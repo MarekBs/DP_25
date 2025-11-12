@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/status_text"
+        android:text="Ready to log sensors"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="16dp"/>
+
+    <!-- 🧍 ID účastníka -->
+    <EditText
+        android:id="@+id/user_id_input"
+        android:hint="Enter participant ID"
+        android:inputType="number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:background="@android:drawable/edit_text"
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/start_button"
+        android:text="Start Logging"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/stop_button"
+        android:text="Stop Logging"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"/>
+
+</LinearLayout>
+
