@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         // Načítame fragment do activity
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, SensorFragmentStorage())
+                .replace(R.id.fragment_container, SensorFragment())
                 .commit()
         }
     }

@@ -7,11 +7,13 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileWriter
 
@@ -31,6 +33,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private var gravity = FloatArray(3)
     private var gyro = FloatArray(3)
     private var linearAcc = FloatArray(3)
+    private lateinit var currentFile: File
 
     fun init(context: Context) {
         this.context = context.applicationContext
@@ -41,19 +44,18 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     fun startLogging() {
         if (isLogging || context == null || sensorManager == null) return
 
-        isLogging = true
-        index = 0
-        lastLogTime = 0L
-
         // 🔔 krátke pípnutie pred štartom
         tone?.startTone(ToneGenerator.TONE_PROP_BEEP, 300)
+        Log.d("SENSOR_LOG", "Beep - preparing to log in 1 second...")
 
-        // počkaj 1 sekundu pred štartom logovania
         Handler(Looper.getMainLooper()).postDelayed({
+            isLogging = true
+            index = 0
+            lastLogTime = 0L
 
             val delayUs = 20_000 // 50 Hz
 
-            // registrácia senzorov
+            // Registrácia senzorov
             sensorManager!!.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.also {
                 sensorManager!!.registerListener(this, it, delayUs)
             }
@@ -67,11 +69,12 @@ class SensorViewModel : ViewModel(), SensorEventListener {
                 sensorManager!!.registerListener(this, it, delayUs)
             }
 
+            // 🔹 Príprava logovacieho súboru
             val logsDir = File(context!!.filesDir, "logs")
             if (!logsDir.exists()) logsDir.mkdirs()
-            val file = File(logsDir, "motion_log.csv")
+            currentFile = File(logsDir, "motion_log_${System.currentTimeMillis()}.csv")
 
-            fileWriter = FileWriter(file)
+            fileWriter = FileWriter(currentFile)
             fileWriter!!.append(
                 "index\tattitude.roll\tattitude.pitch\tattitude.yaw\t" +
                         "gravity.x\tgravity.y\tgravity.z\t" +
@@ -81,27 +84,52 @@ class SensorViewModel : ViewModel(), SensorEventListener {
 
             // 🔔 začiatok logovania
             tone?.startTone(ToneGenerator.TONE_PROP_ACK, 300)
-            Log.d("SENSOR_LOG", "Started logging to: ${file.absolutePath}")
+            Log.d("SENSOR_LOG", "Started logging to: ${currentFile.absolutePath}")
 
             // automatické zastavenie po 45 sekundách
             Handler(Looper.getMainLooper()).postDelayed({
                 stopLogging()
-                tone?.startTone(ToneGenerator.TONE_PROP_NACK, 400) // 🔔 koniec logovania
             }, 45_000)
-
         }, 1_000)
     }
 
     fun stopLogging() {
         if (!isLogging) return
         isLogging = false
+
         sensorManager?.unregisterListener(this)
+
         try {
             fileWriter?.flush()
             fileWriter?.close()
             Log.d("SENSOR_LOG", "Stopped logging.")
+            tone?.startTone(ToneGenerator.TONE_PROP_NACK, 400)
+
+            // 🔼 Upload na Firebase Storage
+            uploadToFirebase(currentFile)
+
         } catch (e: Exception) {
             Log.e("SENSOR_LOG", "Error closing file", e)
+        }
+    }
+
+    private fun uploadToFirebase(file: File) {
+        try {
+            val storage = FirebaseStorage.getInstance()
+            val fileUri = Uri.fromFile(file)
+            val fileRef = storage.reference.child("logs/${file.name}")
+
+            val uploadTask = fileRef.putFile(fileUri)
+            uploadTask.addOnSuccessListener {
+                fileRef.downloadUrl.addOnSuccessListener { uri ->
+                    Log.d("FIREBASE_UPLOAD", "✅ File uploaded successfully: $uri")
+                }
+            }.addOnFailureListener { e ->
+                Log.e("FIREBASE_UPLOAD", "❌ Upload failed: ${e.message}")
+            }
+
+        } catch (e: Exception) {
+            Log.e("FIREBASE_UPLOAD", "❌ Exception: ${e.message}")
         }
     }
 
@@ -168,5 +196,6 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         super.onCleared()
     }
 }
+
 
 

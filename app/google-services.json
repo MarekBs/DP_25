@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "815355959644",
+    "project_id": "dpapp-18ab8",
+    "storage_bucket": "dpapp-18ab8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815355959644:android:ddc7bc6ee5523bfdce8999",
+        "android_client_info": {
+          "package_name": "com.example.dp_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm9hOMBjgrX7vMCQUbefsFBHYr2_jEfXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
