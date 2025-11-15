@@ -29,7 +29,14 @@ class SensorFragment : Fragment() {
 
         sensorViewModel.init(requireContext())
 
+        var fileName = view.findViewById<TextView>(R.id.user_id_input)
+
         startButton.setOnClickListener {
+
+            // ⭐ TU NASTAVÍŠ NÁZOV SÚBORU
+            sensorViewModel.desiredFilename = fileName.text.toString()
+            // alebo: sensorViewModel.desiredFilename = filenameInput.text.toString()
+
             sensorViewModel.startLogging()
             statusText.text = "📊 Logging started (50 Hz)"
         }
@@ -39,7 +46,6 @@ class SensorFragment : Fragment() {
             statusText.text = "✅ Logging stopped."
         }
 
-        // Obnovenie stavu po otočení
         if (sensorViewModel.isLogging) {
             statusText.text = "📊 Logging in progress..."
         }
@@ -49,6 +55,6 @@ class SensorFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // nevoláme stopLogging() → nech sa logovanie zachová cez ViewModel
     }
 }
+
