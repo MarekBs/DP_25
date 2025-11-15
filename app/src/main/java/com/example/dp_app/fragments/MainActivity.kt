@@ -1,7 +1,10 @@
 package com.example.dp_app.fragments
 
+
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.dp_app.BehametricsFragment
+import com.example.dp_app.BehametricsTouchFragment
 import com.example.dp_app.R
 import com.example.dp_app.SensorFragment
 import com.example.dp_app.SensorFragmentStorage
@@ -14,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         // Načítame fragment do activity
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, SensorFragment())
+                .replace(R.id.fragment_container, BehametricsTouchFragment())
                 .commit()
         }
     }

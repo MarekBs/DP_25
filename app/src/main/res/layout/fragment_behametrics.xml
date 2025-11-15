@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- User / Session ID input -->
+    <EditText
+        android:id="@+id/idInput"
+        android:hint="Enter User ID"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:textSize="16sp"/>
+
+    <!-- Status info -->
+    <TextView
+        android:id="@+id/status_text"
+        android:text="Idle"
+        android:paddingTop="16dp"
+        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Start button -->
+    <Button
+        android:id="@+id/start_button"
+        android:text="Start Logging"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:layout_marginTop="24dp" />
+
+    <!-- Stop button -->
+    <Button
+        android:id="@+id/stop_button"
+        android:text="Stop Logging"
+        android:enabled="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>
