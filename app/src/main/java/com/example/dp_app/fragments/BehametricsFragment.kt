@@ -59,9 +59,7 @@ class BehametricsFragment : Fragment() {
         return view
     }
 
-    /**
-     * Upload only NON-TOUCH logs
-     */
+
     private fun uploadNonTouchLogs() {
         val logDir = File(requireContext().filesDir, "logs")
 
@@ -89,15 +87,13 @@ class BehametricsFragment : Fragment() {
             uploadToFirebase(file) {
                 uploaded++
                 if (uploaded == total) {
-                    statusText.text = "✅ All non-touch logs uploaded"
+                    statusText.text = "✅ All logs uploaded"
                 }
             }
         }
     }
 
-    /**
-     * Upload a single file
-     */
+
     private fun uploadToFirebase(file: File, onFinish: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)

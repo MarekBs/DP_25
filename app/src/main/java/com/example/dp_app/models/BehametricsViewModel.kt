@@ -10,7 +10,7 @@ import java.io.File
 
 class BehametricsViewModel : ViewModel() {
 
-    private val _status = MutableLiveData("Idle")
+    private val _status = MutableLiveData("waiting to start ...")
     val status: LiveData<String> = _status
 
     private val _isLogging = MutableLiveData(false)
@@ -19,7 +19,6 @@ class BehametricsViewModel : ViewModel() {
     private lateinit var logDir: File
 
     fun init(context: Context) {
-        // správny priečinok: /data/.../files/logs
         logDir = File(context.filesDir, "logs")
         if (!logDir.exists()) logDir.mkdirs()
     }

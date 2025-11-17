@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/introFragment">
+
+    <fragment
+        android:id="@+id/introFragment"
+        android:name="com.example.dp_app.fragments.IntroFragment"
+        android:label="Intro">
+
+
+        <action
+            android:id="@+id/action_introFragment_to_behametricsFragment"
+            app:destination="@id/behametricsFragment" />
+        <action
+            android:id="@+id/action_introFragment_to_behametricsTouchFragment"
+            app:destination="@id/behametricsTouchFragment" />
+        <action
+            android:id="@+id/action_introFragment_to_sensorFragment"
+            app:destination="@id/sensorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/behametricsFragment"
+        android:name="com.example.dp_app.BehametricsFragment"
+        android:label="BehametricsFragment" />
+    <fragment
+        android:id="@+id/behametricsTouchFragment"
+        android:name="com.example.dp_app.BehametricsTouchFragment"
+        android:label="BehametricsTouchFragment" />
+    <fragment
+        android:id="@+id/sensorFragment"
+        android:name="com.example.dp_app.SensorFragment"
+        android:label="SensorFragment" />
+
+
+</navigation>

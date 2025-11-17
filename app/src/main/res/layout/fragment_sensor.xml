@@ -1,45 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="center"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:background="#FAFAFA">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="24dp">
 
     <TextView
-        android:id="@+id/status_text"
-        android:text="Ready to log sensors"
-        android:textSize="18sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="16dp"/>
+        android:id="@+id/title_text"
+        android:text="Sensor Logging"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:paddingBottom="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
-    <!-- 🧍 ID účastníka -->
     <EditText
-        android:id="@+id/user_id_input"
-        android:hint="Enter participant ID"
-        android:inputType="number"
+        android:id="@+id/idInput"
+        android:hint="Enter User ID"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
         android:background="@android:drawable/edit_text"
-        android:textAlignment="center" />
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:text="Idle"
+        android:textSize="18sp"
+        android:padding="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/start_button"
-        android:text="Start Logging"
+        android:text="Start Sensor Logging"
+        android:textAllCaps="false"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:padding="14dp"
+        android:layout_marginTop="24dp" />
 
     <Button
         android:id="@+id/stop_button"
         android:text="Stop Logging"
+        android:textAllCaps="false"
+        android:enabled="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"/>
+        android:padding="14dp"
+        android:layout_marginTop="12dp" />
 
 </LinearLayout>
+    </ScrollView>
+
+
 

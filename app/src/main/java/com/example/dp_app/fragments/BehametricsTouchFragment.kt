@@ -58,9 +58,7 @@ class BehametricsTouchFragment : Fragment() {
         return view
     }
 
-    /**
-     * Upload ONLY touch logs ("touch" in filename)
-     */
+
     private fun uploadTouchLogs() {
         val logDir = File(requireContext().filesDir, "logs")
         val id = idInput.text.toString()
@@ -95,9 +93,7 @@ class BehametricsTouchFragment : Fragment() {
         }
     }
 
-    /**
-     * Upload a touch log file → to touch_logs/
-     */
+
     private fun uploadToFirebaseTouch(file: File, id: String, onFinish: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
