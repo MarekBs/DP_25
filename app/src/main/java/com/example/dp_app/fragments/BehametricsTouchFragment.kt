@@ -103,7 +103,11 @@ class BehametricsTouchFragment : Fragment() {
         val ref = storage.reference.child("touch_logs/$filename")
 
         ref.putFile(uri)
-            .addOnSuccessListener { onFinish() }
+            .addOnSuccessListener {
+                // Clear file content, keep file for next logging
+                file.writeText("")
+                onFinish()
+            }
             .addOnFailureListener {
                 statusText.text = "Upload failed: ${it.message}"
                 onFinish()

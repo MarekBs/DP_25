@@ -82,11 +82,13 @@ class SensorViewModel : ViewModel(), SensorEventListener {
             fileWriter = FileWriter(currentFile)
 
             fileWriter!!.append(
-                "index\troll\tpitch\tyaw\t" +
+                "index\t" +
+                        "attitude.roll\tattitude.pitch\tattitude.yaw\t" +
                         "gravity.x\tgravity.y\tgravity.z\t" +
-                        "gyro.x\tgyro.y\tgyro.z\t" +
-                        "acc.x\tacc.y\tacc.z\n"
+                        "rotationRate.x\trotationRate.y\trotationRate.z\t" +
+                        "userAcceleration.x\tuserAcceleration.y\tuserAcceleration.z\n"
             )
+
 
             val delayUs = 20_000
 
@@ -170,15 +172,15 @@ class SensorViewModel : ViewModel(), SensorEventListener {
             Sensor.TYPE_GRAVITY -> {
                 val v = event.values
                 gravity[0] = v[0] / 9.81f
-                gravity[1] = -v[1] / 9.81f
-                gravity[2] = -v[2] / 9.81f
+                gravity[1] = v[1] / 9.81f
+                gravity[2] = v[2] / 9.81f
             }
 
             Sensor.TYPE_GYROSCOPE -> {
                 val v = event.values
                 gyro[0] = v[0]
-                gyro[1] = -v[1]
-                gyro[2] = -v[2]
+                gyro[1] = v[1]
+                gyro[2] = v[2]
             }
 
             Sensor.TYPE_LINEAR_ACCELERATION -> {
@@ -191,8 +193,8 @@ class SensorViewModel : ViewModel(), SensorEventListener {
 
                 val v = event.values
                 linearAcc[0] = v[0] / 9.81f
-                linearAcc[1] = -v[1] / 9.81f
-                linearAcc[2] = -v[2] / 9.81f
+                linearAcc[1] = v[1] / 9.81f
+                linearAcc[2] = v[2] / 9.81f
 
                 try {
                     val line =

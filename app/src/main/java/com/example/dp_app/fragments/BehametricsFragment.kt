@@ -1,5 +1,6 @@
 package com.example.dp_app
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.storage.FirebaseStorage
 import android.net.Uri
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import java.io.File
 
@@ -55,10 +57,16 @@ class BehametricsFragment : Fragment() {
             viewModel.stopLogging(requireActivity())
             uploadNonTouchLogs()
         }
+        view.findViewById<View>(R.id.behaFrag).setOnClickListener {
+            hideKeyboard()
+        }
 
         return view
     }
-
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+    }
 
     private fun uploadNonTouchLogs() {
         val logDir = File(requireContext().filesDir, "logs")
@@ -102,12 +110,18 @@ class BehametricsFragment : Fragment() {
         val ref = storage.reference.child("sensors_logs/$filename")
 
         ref.putFile(uri)
-            .addOnSuccessListener { onFinish() }
+            .addOnSuccessListener {
+                // Clear file content, keep file for next logging
+                file.writeText("")
+                onFinish()
+            }
             .addOnFailureListener {
                 statusText.text = "Upload failed: ${it.message}"
                 onFinish()
             }
+
     }
+
 }
 
 
