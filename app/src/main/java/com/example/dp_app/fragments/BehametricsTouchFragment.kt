@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.storage.FirebaseStorage
 import android.net.Uri
+import com.example.dp_app.adapters.ImageAdapter
+import androidx.viewpager2.widget.ViewPager2
 import java.io.File
 
 class BehametricsTouchFragment : Fragment() {
@@ -28,13 +30,19 @@ class BehametricsTouchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val view = inflater.inflate(R.layout.fragment_touch, container, false)
+        return inflater.inflate(R.layout.fragment_touch, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Nájdenie UI prvkov
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
         stopButton = view.findViewById(R.id.stop_button)
         idInput = view.findViewById(R.id.idInput)
 
+        // ViewModel init
         viewModel.init(requireContext())
 
         viewModel.status.observe(viewLifecycleOwner) {
@@ -55,9 +63,17 @@ class BehametricsTouchFragment : Fragment() {
             uploadTouchLogs()
         }
 
-        return view
-    }
+        val images = listOf(
+            R.drawable.num1,
+            R.drawable.num2,
+            R.drawable.num3,
+            R.drawable.num4,
+            R.drawable.num5
+        )
 
+        val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
+        viewPager.adapter = ImageAdapter(images)
+    }
 
     private fun uploadTouchLogs() {
         val logDir = File(requireContext().filesDir, "logs")
@@ -68,7 +84,6 @@ class BehametricsTouchFragment : Fragment() {
             return
         }
 
-        // filter only touch logs
         val files = logDir.listFiles()
             ?.filter { it.name.contains("touch", ignoreCase = true) }
             ?: emptyList()
@@ -93,19 +108,16 @@ class BehametricsTouchFragment : Fragment() {
         }
     }
 
-
     private fun uploadToFirebaseTouch(file: File, id: String, onFinish: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
 
         val filename = "${id}_${file.name}"
-
         val ref = storage.reference.child("touch_logs/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {
-                // Clear file content, keep file for next logging
-                file.writeText("")
+                file.writeText("")  // flush
                 onFinish()
             }
             .addOnFailureListener {
@@ -114,4 +126,5 @@ class BehametricsTouchFragment : Fragment() {
             }
     }
 }
+
 
