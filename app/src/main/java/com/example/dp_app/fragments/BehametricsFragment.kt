@@ -64,9 +64,7 @@ class BehametricsFragment : Fragment() {
             viewModel.stopLogging(requireActivity())
             uploadNonTouchLogs()
         }
-        view.findViewById<View>(R.id.behaFrag).setOnClickListener {
-            hideKeyboard()
-        }
+
 
         dropdown = view.findViewById(R.id.dropdown)
 

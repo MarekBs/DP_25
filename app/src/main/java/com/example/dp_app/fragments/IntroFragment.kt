@@ -21,6 +21,7 @@ class IntroFragment : Fragment() {
         val btnSensors = view.findViewById<Button>(R.id.btn_sensors)
         val btnTouch = view.findViewById<Button>(R.id.btn_touch)
         val btnLogging = view.findViewById<Button>(R.id.btn_logging)
+        val btnZoom = view.findViewById<Button>(R.id.btn_zoom)
 
         btnSensors.setOnClickListener {
             findNavController().navigate(R.id.action_introFragment_to_behametricsFragment)
@@ -32,6 +33,10 @@ class IntroFragment : Fragment() {
 
         btnLogging.setOnClickListener {
             findNavController().navigate(R.id.action_introFragment_to_sensorFragment)
+        }
+
+        btnZoom.setOnClickListener {
+            findNavController().navigate(R.id.action_introFragment_to_cropFragment)
         }
 
         return view
