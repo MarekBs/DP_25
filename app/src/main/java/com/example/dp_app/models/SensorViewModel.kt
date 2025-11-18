@@ -141,7 +141,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private fun uploadToFirebase(file: File, onComplete: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
-        val ref = storage.reference.child("logs/${file.name}")
+        val ref = storage.reference.child("logs_motionsense/${file.name}")
 
         ref.putFile(uri)
             .addOnSuccessListener { onComplete() }

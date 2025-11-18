@@ -12,6 +12,8 @@ import androidx.fragment.app.viewModels
 import com.google.firebase.storage.FirebaseStorage
 import android.net.Uri
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import java.io.File
 
@@ -22,6 +24,11 @@ class BehametricsFragment : Fragment() {
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
+
+    private lateinit var dropdown: AutoCompleteTextView
+
+    private var selectedActivity: String = ""
+
 
     private lateinit var idInput: EditText
 
@@ -60,6 +67,19 @@ class BehametricsFragment : Fragment() {
         view.findViewById<View>(R.id.behaFrag).setOnClickListener {
             hideKeyboard()
         }
+
+        dropdown = view.findViewById(R.id.dropdown)
+
+        val options = listOf("Chôdza vo vrecku", "Zdvihnutie", "Chôdza v ruke")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, options)
+        dropdown.setAdapter(adapter)
+
+        dropdown.setOnItemClickListener { parent, _, position, _ ->
+            val selected = parent.getItemAtPosition(position).toString()
+            // napr. uložíš si vybranú hodnotu do premennej
+            selectedActivity = selected
+        }
+
 
         return view
     }
@@ -106,8 +126,9 @@ class BehametricsFragment : Fragment() {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
 
+
         val filename = idInput.text.toString() + "_" + file.name
-        val ref = storage.reference.child("sensors_logs/$filename")
+        val ref = storage.reference.child("sensors_logs_behametrics/$selectedActivity/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {
