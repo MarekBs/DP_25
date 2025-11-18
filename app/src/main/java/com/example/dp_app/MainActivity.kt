@@ -1,8 +1,7 @@
-package com.example.dp_app.fragments
+package com.example.dp_app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.dp_app.R
 
 class MainActivity : AppCompatActivity() {
 

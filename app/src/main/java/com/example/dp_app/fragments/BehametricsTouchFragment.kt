@@ -113,7 +113,7 @@ class BehametricsTouchFragment : Fragment() {
         val uri = Uri.fromFile(file)
 
         val filename = "${id}_${file.name}"
-        val ref = storage.reference.child("touch_logs_behametrics/$filename")
+        val ref = storage.reference.child("touch_gallery_behametrics/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {

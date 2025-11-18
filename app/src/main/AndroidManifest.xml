@@ -14,7 +14,7 @@
         android:theme="@style/Theme.DP_app">
 
         <activity
-            android:name=".fragments.MainActivity"
+            android:name="MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

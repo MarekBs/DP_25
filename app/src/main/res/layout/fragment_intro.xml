@@ -12,7 +12,7 @@
         android:id="@+id/intro_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Behametrics Data Collection"
+        android:text="Behametrics Data Collector"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#1A1A1A"
@@ -45,16 +45,7 @@
         android:textSize="20dp"
         android:layout_marginBottom="18dp" />
 
-    <Button
-        android:id="@+id/btn_zoom"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:text="Zoom image"
-        android:textAllCaps="false"
-        android:textSize="20dp"
-        android:backgroundTint="#198754"
-        android:textColor="#FFFFFF"
-        android:padding="14dp" />
+
 
 
     <Button
@@ -66,6 +57,18 @@
         android:textSize="20dp"
         android:backgroundTint="#198754"
         android:textColor="#FFFFFF"
+        android:padding="14dp"
+        android:layout_marginBottom="18dp"/>
+
+    <Button
+        android:id="@+id/btn_zoom"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:text="🔎Zoom image"
+        android:textAllCaps="false"
+        android:textSize="20dp"
+        android:backgroundTint="#E0E0E0"
+        android:textColor="#000000"
         android:padding="14dp" />
 
 

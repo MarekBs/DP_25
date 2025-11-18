@@ -34,28 +34,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+
         <EditText
             android:id="@+id/idInput"
             android:hint="Enter User ID"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:textSize="16sp"
+            android:padding="14dp"
+            app:hintTextColor="#8A000000"
+            android:textColorHint="#808080"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:background="@drawable/input_background"
             android:layout_marginBottom="16dp" />
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/dropdownLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="20dp"
+            app:boxStrokeColor="#444444"
+            android:textColorHint="#808080">
 
             <AutoCompleteTextView
                 android:id="@+id/dropdown"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Vyber aktivitu" />
+                android:hint="Vyber aktivitu"
+                android:padding="14dp"
+                android:textSize="18sp"
+                android:textColor="#000000" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
