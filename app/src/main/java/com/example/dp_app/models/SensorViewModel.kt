@@ -144,7 +144,9 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         val ref = storage.reference.child("logs_motionsense/${file.name}")
 
         ref.putFile(uri)
-            .addOnSuccessListener { onComplete() }
+            .addOnSuccessListener {
+                file.delete()
+                onComplete() }
             .addOnFailureListener {
                 _status.value = "Upload failed ❌"
                 onComplete()
