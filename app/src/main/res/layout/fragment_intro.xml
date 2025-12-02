@@ -2,76 +2,127 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center"
-    android:padding="32dp"
-    android:background="#F4FBF4">
+    android:orientation="vertical"
+    android:padding="10dp">
 
 
-    <TextView
-        android:id="@+id/intro_title"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Behametrics Data Collector"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:textColor="#1A1A1A"
-        android:gravity="center"
-        android:layout_marginBottom="36dp" />
+        android:layout_margin="16dp"
+        android:elevation="8dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
 
 
-    <Button
-        android:id="@+id/btn_sensors"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:text="🧭 Behametrics Sensors"
-        android:textAllCaps="false"
-        android:backgroundTint="#198754"
-        android:textColor="#FFFFFF"
-        android:padding="14dp"
-        android:textSize="20dp"
-        android:layout_marginBottom="18dp" />
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="16dp"
+                android:contentDescription="Behametrics Logo"
+                android:src="@drawable/ic_behametrics" />
 
 
-    <Button
-        android:id="@+id/btn_touch"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:text="👆 Behametrics Touch"
-        android:textAllCaps="false"
-        android:backgroundTint="#E0E0E0"
-        android:textColor="#000000"
-        android:padding="14dp"
-        android:textSize="20dp"
-        android:layout_marginBottom="18dp" />
+            <TextView
+                android:id="@+id/intro_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:text="Behametrics\nData Collector"
+                android:textColor="#1A1A1A"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="Vyberte typ zberu dát"
+                android:textColor="#757575"
+                android:textSize="14sp" />
 
 
-    <Button
-        android:id="@+id/btn_logging"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:text="⚙️ Custom Sensor Logging"
-        android:textAllCaps="false"
-        android:textSize="20dp"
-        android:backgroundTint="#198754"
-        android:textColor="#FFFFFF"
-        android:padding="14dp"
-        android:layout_marginBottom="18dp"/>
-
-    <Button
-        android:id="@+id/btn_zoom"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:text="🔎Zoom image"
-        android:textAllCaps="false"
-        android:textSize="20dp"
-        android:backgroundTint="#E0E0E0"
-        android:textColor="#000000"
-        android:padding="14dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_sensors"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginBottom="12dp"
+                android:text="Behametrics Sensors"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#198754"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_sensors"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
 
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_touch"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginBottom="12dp"
+                android:text="Behametrics Touch"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#6C757D"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/touch_ic"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_logging"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginBottom="12dp"
+                android:text="Custom Sensor Logging"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#0D6EFD"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_settings"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_zoom"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="Zoom Image"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#FFC107"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_zoom"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>
 
