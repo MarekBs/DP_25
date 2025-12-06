@@ -23,12 +23,11 @@
             android:layout_marginTop="16dp">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginBottom="16dp"
                 android:contentDescription="Logo"
-                android:src="@drawable/ic_behametrics"
-                app:tint="#7C8DB0" />
+                android:src="@drawable/bb" />
 
             <TextView
                 android:id="@+id/intro_title"
@@ -131,7 +130,8 @@
             android:text="Odhlásiť sa"
             android:textAllCaps="false"
             android:textSize="14sp"
-            android:textColor="#E57373"
+            android:textColor="#D73232"
+            android:backgroundTint="#E9E9E9"
             app:rippleColor="#FFCDD2" />
 
     </LinearLayout>

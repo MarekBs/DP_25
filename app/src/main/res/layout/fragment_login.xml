@@ -24,27 +24,26 @@
             android:padding="32dp">
 
             <ImageView
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_marginBottom="24dp"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginBottom="5dp"
                 android:contentDescription="Logo"
-                android:src="@drawable/ic_behametrics"
-                app:tint="#7C8DB0" />
+                android:src="@drawable/bb" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="10dp"
                 android:gravity="center"
                 android:text="Data Collector"
                 android:textColor="#2D3748"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
+                android:layout_marginBottom="20dp"
                 android:gravity="center"
                 android:text="Zadajte vaše ID"
                 android:textColor="#A0AEC0"
