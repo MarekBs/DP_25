@@ -5,17 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.dp_app.R
 import com.example.dp_app.BehametricsViewModel
+import com.example.dp_app.UserSession
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.storage.FirebaseStorage
-
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 
 class CropFragment : Fragment() {
@@ -26,7 +25,11 @@ class CropFragment : Fragment() {
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
-    private lateinit var idInput: EditText
+    private lateinit var backButton: Button
+    private lateinit var counterText: TextView
+
+    private var currentAttempt = 0
+    private val maxAttempts = 15
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,37 +42,16 @@ class CropFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Nastav obrázok
         photoView = view.findViewById(R.id.photoView)
         photoView.setImageResource(R.drawable.stvorec_zoom)
 
-        // Získaj rozmery obrázka priamo z drawable
-        val drawable = resources.getDrawable(R.drawable.stvorec_zoom, null)
-        val imageWidth = drawable.intrinsicWidth.toFloat()
-        val imageHeight = drawable.intrinsicHeight.toFloat()
-
-        // Veľkosť rámčeka (350dp)
-        val frameSize = 350 * resources.displayMetrics.density
-
-        val scaleX = frameSize / imageWidth
-        val scaleY = frameSize / imageHeight
-        val maxScale = maxOf(scaleX, scaleY)
-
-        // Nastav zoom úrovne
-        photoView.minimumScale = 1f
-        photoView.maximumScale = maxScale
-
-        photoView.setScaleLevels(
-            1.0f,
-            1.005f,
-            maxScale
-        )
-
+        setupPhotoView()
 
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
         stopButton = view.findViewById(R.id.stop_button)
-        idInput = view.findViewById(R.id.idInput)
+        backButton = view.findViewById(R.id.back_button)
+        counterText = view.findViewById(R.id.counter_text)
 
         viewModel.init(requireContext())
 
@@ -78,26 +60,96 @@ class CropFragment : Fragment() {
         }
 
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
-            startButton.isEnabled = !logging
+            startButton.isEnabled = !logging && currentAttempt < maxAttempts
             stopButton.isEnabled = logging
         }
 
         startButton.setOnClickListener {
-            viewModel.startLogging(requireActivity())
+            startNextAttempt()
         }
 
         stopButton.setOnClickListener {
-            viewModel.stopLogging(requireActivity())
-            uploadTouchLogs()
+            stopCurrentLogging()
+        }
+
+        backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_cropFragment_to_introFragment)
+        }
+
+        backButton.visibility = View.GONE
+        updateCounter()
+    }
+
+    private fun setupPhotoView() {
+        val drawable = resources.getDrawable(R.drawable.stvorec_zoom, null)
+        val imageWidth = drawable.intrinsicWidth.toFloat()
+        val imageHeight = drawable.intrinsicHeight.toFloat()
+
+        val frameSize = 280 * resources.displayMetrics.density
+
+        val scaleX = frameSize / imageWidth
+        val scaleY = frameSize / imageHeight
+        val maxScale = maxOf(scaleX, scaleY)
+
+        photoView.minimumScale = 1f
+        photoView.maximumScale = maxScale
+
+        photoView.setScaleLevels(
+            1.0f,
+            1.005f,
+            maxScale
+        )
+    }
+
+    private fun resetZoom() {
+        photoView.setScale(1f, true)
+    }
+
+    private fun startNextAttempt() {
+        if (currentAttempt >= maxAttempts) {
+            finishAllAttempts()
+            return
+        }
+
+        currentAttempt++
+        updateCounter()
+        statusText.text = "Logovanie..."
+        viewModel.startLogging(requireActivity())
+    }
+
+    private fun stopCurrentLogging() {
+        viewModel.stopLogging(requireActivity())
+        
+        // Reset zoom na začiatok
+        resetZoom()
+        
+        uploadCurrentLog {
+            if (currentAttempt >= maxAttempts) {
+                finishAllAttempts()
+            } else {
+                statusText.text = "Pripravený na ďalší pokus"
+                startButton.isEnabled = true
+            }
         }
     }
 
-    private fun uploadTouchLogs() {
+    private fun finishAllAttempts() {
+        statusText.text = "Hotovo!"
+        counterText.text = "$maxAttempts / $maxAttempts"
+        backButton.visibility = View.VISIBLE
+        startButton.isEnabled = false
+    }
+
+    private fun updateCounter() {
+        counterText.text = "$currentAttempt / $maxAttempts"
+    }
+
+    private fun uploadCurrentLog(onComplete: () -> Unit) {
         val logDir = File(requireContext().filesDir, "logs")
-        val id = idInput.text.toString()
 
         if (!logDir.exists()) {
-            statusText.text = "❗ Logs folder not found."
+            statusText.text = "Priečinok logov nenájdený"
+            onComplete()
             return
         }
 
@@ -106,42 +158,42 @@ class CropFragment : Fragment() {
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "❗ No touch logs found."
+            statusText.text = "Žiadne touch logy"
+            onComplete()
             return
         }
 
-        statusText.text = "⬆ Uploading touch logs..."
+        statusText.text = "Nahrávanie..."
 
         var uploaded = 0
         val total = files.size
 
         for (file in files) {
-            uploadToFirebaseTouch(file, id) {
+            uploadToFirebaseTouch(file, currentAttempt) {
                 uploaded++
                 if (uploaded == total) {
-                    statusText.text = "✅ Touch logs uploaded"
+                    onComplete()
                 }
             }
         }
     }
 
-    private fun uploadToFirebaseTouch(file: File, id: String, onFinish: () -> Unit) {
+    private fun uploadToFirebaseTouch(file: File, attemptNumber: Int, onFinish: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
 
-        val filename = "${id}_${file.name}"
+        val userId = UserSession.userId
+        val filename = "${userId}_pokus${attemptNumber}_${file.name}"
         val ref = storage.reference.child("touch_zoom_behametrics/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {
-                file.writeText("") // flush
+                file.writeText("")
                 onFinish()
             }
             .addOnFailureListener {
-                statusText.text = "Upload failed: ${it.message}"
+                statusText.text = "Chyba: ${it.message}"
                 onFinish()
             }
     }
 }
-
-

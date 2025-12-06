@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.dp_app.R
+import com.example.dp_app.UserSession
 
 class IntroFragment : Fragment() {
 
@@ -18,10 +20,15 @@ class IntroFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_intro, container, false)
 
+
+        val userIdText = view.findViewById<TextView>(R.id.user_id_text)
+        userIdText.text = "Prihlásený: ${UserSession.userId}"
+
         val btnSensors = view.findViewById<Button>(R.id.btn_sensors)
         val btnTouch = view.findViewById<Button>(R.id.btn_touch)
         val btnLogging = view.findViewById<Button>(R.id.btn_logging)
         val btnZoom = view.findViewById<Button>(R.id.btn_zoom)
+        val btnLogout = view.findViewById<Button>(R.id.btn_logout)
 
         btnSensors.setOnClickListener {
             findNavController().navigate(R.id.action_introFragment_to_behametricsFragment)
@@ -37,6 +44,11 @@ class IntroFragment : Fragment() {
 
         btnZoom.setOnClickListener {
             findNavController().navigate(R.id.action_introFragment_to_cropFragment)
+        }
+
+        btnLogout.setOnClickListener {
+            UserSession.clear()
+            findNavController().navigate(R.id.action_introFragment_to_loginFragment)
         }
 
         return view

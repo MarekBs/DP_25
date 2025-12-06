@@ -1,20 +1,19 @@
 package com.example.dp_app
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.google.firebase.storage.FirebaseStorage
-import android.net.Uri
-import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.EditText
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.google.firebase.storage.FirebaseStorage
+import android.net.Uri
 import java.io.File
 
 class BehametricsFragment : Fragment() {
@@ -24,13 +23,13 @@ class BehametricsFragment : Fragment() {
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
-
+    private lateinit var backButton: Button
+    private lateinit var counterText: TextView
     private lateinit var dropdown: AutoCompleteTextView
 
     private var selectedActivity: String = ""
-
-
-    private lateinit var idInput: EditText
+    private var currentAttempt = 0
+    private val maxAttempts = 15
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +42,9 @@ class BehametricsFragment : Fragment() {
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
         stopButton = view.findViewById(R.id.stop_button)
-        idInput = view.findViewById(R.id.idInput)
+        backButton = view.findViewById(R.id.back_button)
+        counterText = view.findViewById(R.id.counter_text)
+        dropdown = view.findViewById(R.id.dropdown)
 
         viewModel.init(requireContext())
 
@@ -52,99 +53,128 @@ class BehametricsFragment : Fragment() {
         }
 
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
-            startButton.isEnabled = !logging
+            startButton.isEnabled = !logging && currentAttempt < maxAttempts
             stopButton.isEnabled = logging
         }
-
-        startButton.setOnClickListener {
-            viewModel.startLogging(requireActivity())
-        }
-
-        stopButton.setOnClickListener {
-            viewModel.stopLogging(requireActivity())
-            uploadNonTouchLogs()
-        }
-
-
-        dropdown = view.findViewById(R.id.dropdown)
 
         val options = listOf("Chôdza vo vrecku", "Zdvihnutie", "Chôdza v ruke")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, options)
         dropdown.setAdapter(adapter)
 
         dropdown.setOnItemClickListener { parent, _, position, _ ->
-            val selected = parent.getItemAtPosition(position).toString()
-            // napr. uložíš si vybranú hodnotu do premennej
-            selectedActivity = selected
+            selectedActivity = parent.getItemAtPosition(position).toString()
         }
 
+        startButton.setOnClickListener {
+            if (selectedActivity.isBlank()) {
+                Toast.makeText(requireContext(), "Vyberte aktivitu", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            startNextAttempt()
+        }
+
+        stopButton.setOnClickListener {
+            stopCurrentLogging()
+        }
+
+        backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_behametricsFragment_to_introFragment)
+        }
+
+        backButton.visibility = View.GONE
+        updateCounter()
 
         return view
     }
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
-    }
 
-    private fun uploadNonTouchLogs() {
-        val logDir = File(requireContext().filesDir, "logs")
-
-        if (!logDir.exists()) {
-            statusText.text = "❗ Logs folder not found."
+    private fun startNextAttempt() {
+        if (currentAttempt >= maxAttempts) {
+            finishAllAttempts()
             return
         }
 
-        // filter out touch logs
+        currentAttempt++
+        updateCounter()
+        statusText.text = "Logovanie..."
+        dropdown.isEnabled = false
+        viewModel.startLogging(requireActivity())
+    }
+
+    private fun stopCurrentLogging() {
+        viewModel.stopLogging(requireActivity())
+        
+        uploadCurrentLog {
+            if (currentAttempt >= maxAttempts) {
+                finishAllAttempts()
+            } else {
+                statusText.text = "Pripravený na ďalší pokus"
+                startButton.isEnabled = true
+            }
+        }
+    }
+
+    private fun finishAllAttempts() {
+        statusText.text = "Hotovo!"
+        counterText.text = "$maxAttempts / $maxAttempts"
+        backButton.visibility = View.VISIBLE
+        startButton.isEnabled = false
+        dropdown.isEnabled = false
+    }
+
+    private fun updateCounter() {
+        counterText.text = "$currentAttempt / $maxAttempts"
+    }
+
+    private fun uploadCurrentLog(onComplete: () -> Unit) {
+        val logDir = File(requireContext().filesDir, "logs")
+
+        if (!logDir.exists()) {
+            statusText.text = "Priečinok logov nenájdený"
+            onComplete()
+            return
+        }
+
         val files = logDir.listFiles()
             ?.filter { !it.name.contains("touch", ignoreCase = true) }
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "❗ No non-touch logs found."
+            statusText.text = "Žiadne logy"
+            onComplete()
             return
         }
 
-        statusText.text = "⬆ Uploading logs..."
+        statusText.text = "Nahrávanie..."
 
         var uploaded = 0
         val total = files.size
 
         for (file in files) {
-            uploadToFirebase(file) {
+            uploadToFirebase(file, currentAttempt) {
                 uploaded++
                 if (uploaded == total) {
-                    statusText.text = "✅ All logs uploaded"
+                    onComplete()
                 }
             }
         }
     }
 
-
-    private fun uploadToFirebase(file: File, onFinish: () -> Unit) {
+    private fun uploadToFirebase(file: File, attemptNumber: Int, onFinish: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
 
-
-        val filename = idInput.text.toString() + "_" + file.name
+        val userId = UserSession.userId
+        val filename = "${userId}_pokus${attemptNumber}_${file.name}"
         val ref = storage.reference.child("sensors_logs_behametrics/$selectedActivity/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {
-                // Clear file content, keep file for next logging
                 file.writeText("")
                 onFinish()
             }
             .addOnFailureListener {
-                statusText.text = "Upload failed: ${it.message}"
+                statusText.text = "Chyba: ${it.message}"
                 onFinish()
             }
-
     }
-
 }
-
-
-
-
-
-
