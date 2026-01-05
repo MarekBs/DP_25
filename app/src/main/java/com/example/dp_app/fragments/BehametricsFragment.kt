@@ -57,7 +57,7 @@ class BehametricsFragment : Fragment() {
             stopButton.isEnabled = logging
         }
 
-        val options = listOf("Chôdza vo vrecku", "Zdvihnutie", "Chôdza v ruke")
+        val options = listOf("Položenie mobilu", "Zdvihnutie mobilu k uchu")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, options)
         dropdown.setAdapter(adapter)
 
