@@ -25,6 +25,9 @@ class SensorFragment : Fragment() {
     private var currentAttempt = 0
     private val maxAttempts = 15
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var autoStopRunnable: Runnable? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -77,16 +80,20 @@ class SensorFragment : Fragment() {
         currentAttempt++
         updateCounter()
         statusText.text = "Logovanie..."
-        
+
         val userId = UserSession.userId
         sensorViewModel.desiredFilename = "${userId}_pokus${currentAttempt}"
         sensorViewModel.startLogging()
+
+        autoStopRunnable = Runnable { stopCurrentLogging() }
+        handler.postDelayed(autoStopRunnable!!, 16000) // 1s oneskorenie + 15s nahrávanie
     }
 
     private fun stopCurrentLogging() {
+        autoStopRunnable?.let { handler.removeCallbacks(it) }
         sensorViewModel.stopLogging()
-        
-        Handler(Looper.getMainLooper()).postDelayed({
+
+        handler.postDelayed({
             if (currentAttempt >= maxAttempts) {
                 finishAllAttempts()
             } else {

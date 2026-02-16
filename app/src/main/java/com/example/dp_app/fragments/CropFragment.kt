@@ -158,7 +158,7 @@ class CropFragment : Fragment() {
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "Žiadne touch logy"
+            statusText.text = "Žiadne dotykové logy"
             onComplete()
             return
         }

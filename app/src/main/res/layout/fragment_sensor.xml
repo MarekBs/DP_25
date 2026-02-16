@@ -19,7 +19,7 @@
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sensor Logging"
+            android:text="Chôdza"
             android:textSize="20sp"
             android:textColor="#2D3748"
             android:fontFamily="sans-serif-medium" />

@@ -19,7 +19,7 @@
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Touch Gallery"
+            android:text="Dotyková galéria"
             android:textSize="20sp"
             android:textColor="#2D3748"
             android:fontFamily="sans-serif-medium" />
@@ -70,7 +70,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Swipe"
+                android:text="Potiahnite"
                 android:textSize="11sp"
                 android:textColor="#A0AEC0"
                 android:layout_gravity="bottom|center_horizontal"

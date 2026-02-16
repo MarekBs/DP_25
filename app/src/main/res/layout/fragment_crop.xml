@@ -19,7 +19,7 @@
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Zoom Touch"
+            android:text="Dotykový zoom"
             android:textSize="20sp"
             android:textColor="#2D3748"
             android:fontFamily="sans-serif-medium" />

@@ -27,7 +27,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     var desiredFilename: String = ""
 
 
-    private val _status = MutableLiveData("waiting to start...")
+    private val _status = MutableLiveData("Čakanie na spustenie...")
     val status: LiveData<String> get() = _status
 
     private val _isLogging = MutableLiveData(false)
@@ -56,14 +56,14 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         if (_isLogging.value == true) return
         if (sensorManager == null || context == null) return
 
-        _status.value = "Starting..."
+        _status.value = "Spúšťanie..."
         tone?.startTone(ToneGenerator.TONE_PROP_BEEP, 300)
 
         Handler(Looper.getMainLooper()).postDelayed({
 
 
             _isLogging.value = true
-            _status.value = "Recording..."
+            _status.value = "Nahrávanie..."
             isAttitudeInitialized = false
             index = 0
             lastLogTime = 0L
@@ -116,7 +116,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         if (_isLogging.value != true) return
 
         _isLogging.value = false
-        _status.value = "Stopping..."
+        _status.value = "Zastavovanie..."
 
 
         sensorManager?.unregisterListener(this)
@@ -130,10 +130,10 @@ class SensorViewModel : ViewModel(), SensorEventListener {
 
         tone?.startTone(ToneGenerator.TONE_PROP_NACK, 300)
 
-        _status.value = "⬆ Uploading..."
+        _status.value = "⬆ Nahrávanie na server..."
 
         uploadToFirebase(currentFile) {
-            _status.postValue("Files uploaded ✅")
+            _status.postValue("Súbory nahrané ✅")
         }
     }
 
@@ -148,7 +148,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
                 file.delete()
                 onComplete() }
             .addOnFailureListener {
-                _status.value = "Upload failed ❌"
+                _status.value = "Nahrávanie zlyhalo ❌"
                 onComplete()
             }
     }

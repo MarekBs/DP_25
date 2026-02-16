@@ -1,6 +1,10 @@
 package com.example.dp_app
 
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +35,11 @@ class BehametricsFragment : Fragment() {
     private var currentAttempt = 0
     private val maxAttempts = 15
 
+    private lateinit var tone: ToneGenerator
+    private val handler = Handler(Looper.getMainLooper())
+    private var autoStopRunnable: Runnable? = null
+    private val activityDuration = 2000L
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,6 +56,7 @@ class BehametricsFragment : Fragment() {
         dropdown = view.findViewById(R.id.dropdown)
 
         viewModel.init(requireContext())
+        tone = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
 
         viewModel.status.observe(viewLifecycleOwner) {
             statusText.text = it
@@ -57,7 +67,7 @@ class BehametricsFragment : Fragment() {
             stopButton.isEnabled = logging
         }
 
-        val options = listOf("Položenie mobilu", "Zdvihnutie mobilu k uchu")
+        val options = listOf("Položenie na stôl", "Zdvihnutie k uchu")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, options)
         dropdown.setAdapter(adapter)
 
@@ -97,12 +107,18 @@ class BehametricsFragment : Fragment() {
         updateCounter()
         statusText.text = "Logovanie..."
         dropdown.isEnabled = false
+        tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
         viewModel.startLogging(requireActivity())
+
+        autoStopRunnable = Runnable { stopCurrentLogging() }
+        handler.postDelayed(autoStopRunnable!!, activityDuration)
     }
 
     private fun stopCurrentLogging() {
+        autoStopRunnable?.let { handler.removeCallbacks(it) }
         viewModel.stopLogging(requireActivity())
-        
+        tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+
         uploadCurrentLog {
             if (currentAttempt >= maxAttempts) {
                 finishAllAttempts()

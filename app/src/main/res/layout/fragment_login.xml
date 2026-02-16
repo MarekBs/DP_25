@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="center"
-                android:text="Data Collector"
+                android:text="Zber dát"
                 android:textColor="#2D3748"
                 android:textSize="18sp"
                 android:fontFamily="sans-serif-medium" />

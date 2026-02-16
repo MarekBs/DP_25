@@ -10,7 +10,7 @@ import java.io.File
 
 class BehametricsViewModel : ViewModel() {
 
-    private val _status = MutableLiveData("waiting to start ...")
+    private val _status = MutableLiveData("Čakanie na spustenie...")
     val status: LiveData<String> = _status
 
     private val _isLogging = MutableLiveData(false)
@@ -27,9 +27,9 @@ class BehametricsViewModel : ViewModel() {
         try {
             Logger.start(activity)
             _isLogging.value = true
-            _status.value = "Logging started"
+            _status.value = "Logovanie spustené"
         } catch (e: Exception) {
-            _status.value = "Error: ${e.message}"
+            _status.value = "Chyba: ${e.message}"
         }
     }
 
@@ -37,9 +37,9 @@ class BehametricsViewModel : ViewModel() {
         try {
             Logger.stop(activity)
             _isLogging.value = false
-            _status.value = "Logging stopped"
+            _status.value = "Logovanie zastavené"
         } catch (e: Exception) {
-            _status.value = "Error: ${e.message}"
+            _status.value = "Chyba: ${e.message}"
         }
     }
 

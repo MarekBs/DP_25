@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">DP_app</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">Prázdny fragment</string>
 </resources>
