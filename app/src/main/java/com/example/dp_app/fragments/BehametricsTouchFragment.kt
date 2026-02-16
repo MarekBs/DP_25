@@ -24,6 +24,7 @@ class BehametricsTouchFragment : Fragment() {
     private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
+    private lateinit var hintOverlay: View
 
     private var currentAttempt = 0
     private val maxAttempts = 15
@@ -44,6 +45,7 @@ class BehametricsTouchFragment : Fragment() {
         stopButton = view.findViewById(R.id.stop_button)
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
+        hintOverlay = view.findViewById(R.id.hint_overlay)
 
         viewModel.init(requireContext())
 
@@ -87,6 +89,12 @@ class BehametricsTouchFragment : Fragment() {
         if (currentAttempt >= maxAttempts) {
             finishAllAttempts()
             return
+        }
+
+        if (currentAttempt == 0) {
+            hintOverlay.animate().alpha(0f).setDuration(300).withEndAction {
+                hintOverlay.visibility = View.GONE
+            }.start()
         }
 
         currentAttempt++
