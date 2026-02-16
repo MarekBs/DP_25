@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="@color/bg_primary">
 
 
     <LinearLayout
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:text="Dotyková galéria"
             android:textSize="20sp"
-            android:textColor="#2D3748"
+            android:textColor="@color/text_primary"
             android:fontFamily="sans-serif-medium" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Pripravený"
             android:textSize="13sp"
-            android:textColor="#A0AEC0"
+            android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp" />
 
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="0 / 15"
             android:textSize="28sp"
-            android:textColor="#7C8DB0"
+            android:textColor="@color/accent_soft"
             android:fontFamily="sans-serif-light"
             android:layout_marginTop="12dp" />
 
@@ -55,7 +55,7 @@
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="1dp"
-        app:cardBackgroundColor="#FFFFFF">
+        app:cardBackgroundColor="@color/bg_surface">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -65,17 +65,17 @@
                 android:id="@+id/viewPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#FAFAFA" />
+                android:background="@color/bg_surface" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Potiahnite"
                 android:textSize="11sp"
-                android:textColor="#A0AEC0"
+                android:textColor="@color/text_secondary"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginBottom="12dp"
-                android:background="#FFFFFF"
+                android:background="@color/bg_surface"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp" />
 
@@ -98,7 +98,7 @@
             android:text="Spustiť pokus"
             android:textAllCaps="false"
             android:textSize="15sp"
-            app:backgroundTint="#7C8DB0"
+            app:backgroundTint="@color/accent"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             android:layout_marginBottom="12dp" />
@@ -111,7 +111,7 @@
             android:textAllCaps="false"
             android:textSize="15sp"
             android:enabled="false"
-            app:backgroundTint="#E57373"
+            app:backgroundTint="@color/danger"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             android:layout_marginBottom="8dp" />
@@ -124,7 +124,7 @@
             android:text="Späť na výber"
             android:textAllCaps="false"
             android:textSize="14sp"
-            android:textColor="#7C8DB0"
+            android:textColor="@color/accent_light"
             android:visibility="gone" />
 
     </LinearLayout>

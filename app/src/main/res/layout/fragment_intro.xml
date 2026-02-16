@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="@color/bg_primary"
     android:fillViewport="true">
 
     <LinearLayout
@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Výber senzora"
-                android:textColor="#2D3748"
+                android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:fontFamily="sans-serif-medium" />
 
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Prihlásený: "
-                android:textColor="#7C8DB0"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
         </LinearLayout>
@@ -58,13 +58,13 @@
             android:text="Behametrics senzory"
             android:textAllCaps="false"
             android:textSize="15sp"
-            app:backgroundTint="#7C8DB0"
+            app:backgroundTint="@color/accent"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_sensors"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_touch"
@@ -74,13 +74,13 @@
             android:text="Dotyková galéria"
             android:textAllCaps="false"
             android:textSize="15sp"
-            app:backgroundTint="#9AA5B8"
+            app:backgroundTint="@color/accent_light"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             app:icon="@drawable/touch_ic"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logging"
@@ -90,13 +90,13 @@
             android:text="Chôdza"
             android:textAllCaps="false"
             android:textSize="15sp"
-            app:backgroundTint="#A8B5C8"
+            app:backgroundTint="@color/accent_light"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_settings"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_zoom"
@@ -106,19 +106,19 @@
             android:text="Dotykový zoom"
             android:textAllCaps="false"
             android:textSize="15sp"
-            app:backgroundTint="#B8C4D6"
+            app:backgroundTint="@color/accent_light"
             app:cornerRadius="12dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_zoom"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@color/white" />
 
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#E2E8F0"
+            android:background="@color/divider"
             android:layout_marginBottom="16dp" />
 
 
@@ -130,9 +130,9 @@
             android:text="Odhlásiť sa"
             android:textAllCaps="false"
             android:textSize="14sp"
-            android:textColor="#D73232"
-            android:backgroundTint="#E9E9E9"
-            app:rippleColor="#FFCDD2" />
+            android:textColor="@color/danger_light"
+            android:backgroundTint="@color/bg_surface"
+            app:rippleColor="#44EF4444" />
 
     </LinearLayout>
 
