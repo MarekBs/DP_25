@@ -64,6 +64,7 @@ class BehametricsFragment : Fragment() {
         viewModel.currentAttempt.observe(viewLifecycleOwner) { attempt ->
             counterText.text = "$attempt / ${viewModel.maxAttempts}"
             startButton.isEnabled = !(viewModel.isLogging.value ?: false) && attempt < viewModel.maxAttempts
+            dropdown.isEnabled = attempt == 0
         }
 
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
