@@ -86,7 +86,7 @@ class SensorFragment : Fragment() {
         sensorViewModel.incrementAttempt()
         statusText.text = "Logovanie..."
 
-        sensorViewModel.desiredFilename = "pokus${sensorViewModel.currentAttempt.value}"
+        sensorViewModel.desiredFilename = "log${sensorViewModel.currentAttempt.value}"
         sensorViewModel.startLogging()
 
         autoStopRunnable = Runnable { stopCurrentLogging() }

@@ -189,7 +189,7 @@ class BehametricsFragment : Fragment() {
 
         val userId = UserSession.userId
         val activity = viewModel.selectedActivity.value ?: ""
-        val filename = "pokus${attemptNumber}_${file.name}"
+        val filename = "log${attemptNumber}_${file.name}"
         val ref = storage.reference.child("sensors_logs_behametrics/$activity/$userId/$filename")
 
         ref.putFile(uri)

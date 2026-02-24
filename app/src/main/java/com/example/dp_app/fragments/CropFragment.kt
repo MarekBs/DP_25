@@ -189,7 +189,7 @@ class CropFragment : Fragment() {
         val uri = Uri.fromFile(file)
 
         val userId = UserSession.userId
-        val filename = "pokus${attemptNumber}_${file.name}"
+        val filename = "log${attemptNumber}_${file.name}"
         val ref = storage.reference.child("touch_zoom_behametrics/$userId/$filename")
 
         ref.putFile(uri)
