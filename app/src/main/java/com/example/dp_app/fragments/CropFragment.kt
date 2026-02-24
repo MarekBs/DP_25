@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dp_app.R
-import com.example.dp_app.BehametricsViewModel
+import com.example.dp_app.models.BehametricsViewModel
 import com.example.dp_app.UserSession
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.storage.FirebaseStorage
@@ -28,9 +28,6 @@ class CropFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var hintOverlay: View
-
-    private var currentAttempt = 0
-    private val maxAttempts = 15
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,8 +58,14 @@ class CropFragment : Fragment() {
             statusText.text = it
         }
 
+        viewModel.currentAttempt.observe(viewLifecycleOwner) { attempt ->
+            counterText.text = "$attempt / ${viewModel.maxAttempts}"
+            startButton.isEnabled = !(viewModel.isLogging.value ?: false) && attempt < viewModel.maxAttempts
+        }
+
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
-            startButton.isEnabled = !logging && currentAttempt < maxAttempts
+            val attempt = viewModel.currentAttempt.value ?: 0
+            startButton.isEnabled = !logging && attempt < viewModel.maxAttempts
             stopButton.isEnabled = logging
         }
 
@@ -79,7 +82,6 @@ class CropFragment : Fragment() {
         }
 
         backButton.visibility = View.GONE
-        updateCounter()
     }
 
     private fun setupPhotoView() {
@@ -108,31 +110,31 @@ class CropFragment : Fragment() {
     }
 
     private fun startNextAttempt() {
-        if (currentAttempt >= maxAttempts) {
+        val attempt = viewModel.currentAttempt.value ?: 0
+        if (attempt >= viewModel.maxAttempts) {
             finishAllAttempts()
             return
         }
 
-        if (currentAttempt == 0) {
+        if (attempt == 0) {
             hintOverlay.animate().alpha(0f).setDuration(300).withEndAction {
                 hintOverlay.visibility = View.GONE
             }.start()
         }
 
-        currentAttempt++
-        updateCounter()
+        viewModel.incrementAttempt()
         statusText.text = "Logovanie..."
         viewModel.startLogging(requireActivity())
     }
 
     private fun stopCurrentLogging() {
         viewModel.stopLogging(requireActivity())
-        
-        // Reset zoom na začiatok
+
         resetZoom()
-        
+
         uploadCurrentLog {
-            if (currentAttempt >= maxAttempts) {
+            val attempt = viewModel.currentAttempt.value ?: 0
+            if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
                 statusText.text = "Pripravený na ďalší pokus"
@@ -143,13 +145,8 @@ class CropFragment : Fragment() {
 
     private fun finishAllAttempts() {
         statusText.text = "Hotovo!"
-        counterText.text = "$maxAttempts / $maxAttempts"
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
-    }
-
-    private fun updateCounter() {
-        counterText.text = "$currentAttempt / $maxAttempts"
     }
 
     private fun uploadCurrentLog(onComplete: () -> Unit) {
@@ -162,22 +159,23 @@ class CropFragment : Fragment() {
         }
 
         val files = logDir.listFiles()
-            ?.filter { it.name.contains("touch", ignoreCase = true) }
+            ?.filter { !it.name.contains("orientation", ignoreCase = true) }
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "Žiadne dotykové logy"
+            statusText.text = "Žiadne logy"
             onComplete()
             return
         }
 
         statusText.text = "Nahrávanie..."
 
+        val attempt = viewModel.currentAttempt.value ?: 0
         var uploaded = 0
         val total = files.size
 
         for (file in files) {
-            uploadToFirebaseTouch(file, currentAttempt) {
+            uploadToFirebaseTouch(file, attempt) {
                 uploaded++
                 if (uploaded == total) {
                     onComplete()
@@ -191,8 +189,8 @@ class CropFragment : Fragment() {
         val uri = Uri.fromFile(file)
 
         val userId = UserSession.userId
-        val filename = "${userId}_pokus${attemptNumber}_${file.name}"
-        val ref = storage.reference.child("touch_zoom_behametrics/$filename")
+        val filename = "pokus${attemptNumber}_${file.name}"
+        val ref = storage.reference.child("touch_zoom_behametrics/$userId/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {

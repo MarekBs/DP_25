@@ -1,4 +1,4 @@
-package com.example.dp_app
+package com.example.dp_app.fragments
 
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -16,6 +16,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.dp_app.R
+import com.example.dp_app.UserSession
+import com.example.dp_app.models.BehametricsViewModel
 import com.google.firebase.storage.FirebaseStorage
 import android.net.Uri
 import java.io.File
@@ -31,14 +34,10 @@ class BehametricsFragment : Fragment() {
     private lateinit var counterText: TextView
     private lateinit var dropdown: AutoCompleteTextView
 
-    private var selectedActivity: String = ""
-    private var currentAttempt = 0
-    private val maxAttempts = 15
-
     private lateinit var tone: ToneGenerator
     private val handler = Handler(Looper.getMainLooper())
     private var autoStopRunnable: Runnable? = null
-    private val activityDuration = 2000L
+    private val activityDuration = 3000L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,9 +61,21 @@ class BehametricsFragment : Fragment() {
             statusText.text = it
         }
 
+        viewModel.currentAttempt.observe(viewLifecycleOwner) { attempt ->
+            counterText.text = "$attempt / ${viewModel.maxAttempts}"
+            startButton.isEnabled = !(viewModel.isLogging.value ?: false) && attempt < viewModel.maxAttempts
+        }
+
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
-            startButton.isEnabled = !logging && currentAttempt < maxAttempts
+            val attempt = viewModel.currentAttempt.value ?: 0
+            startButton.isEnabled = !logging && attempt < viewModel.maxAttempts
             stopButton.isEnabled = logging
+        }
+
+        viewModel.selectedActivity.observe(viewLifecycleOwner) { activity ->
+            if (activity.isNotBlank() && dropdown.text.toString() != activity) {
+                dropdown.setText(activity, false)
+            }
         }
 
         val options = listOf("Položenie na stôl", "Zdvihnutie k uchu")
@@ -72,11 +83,11 @@ class BehametricsFragment : Fragment() {
         dropdown.setAdapter(adapter)
 
         dropdown.setOnItemClickListener { parent, _, position, _ ->
-            selectedActivity = parent.getItemAtPosition(position).toString()
+            viewModel.setSelectedActivity(parent.getItemAtPosition(position).toString())
         }
 
         startButton.setOnClickListener {
-            if (selectedActivity.isBlank()) {
+            if (viewModel.selectedActivity.value.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "Vyberte aktivitu", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -92,19 +103,18 @@ class BehametricsFragment : Fragment() {
         }
 
         backButton.visibility = View.GONE
-        updateCounter()
 
         return view
     }
 
     private fun startNextAttempt() {
-        if (currentAttempt >= maxAttempts) {
+        val attempt = viewModel.currentAttempt.value ?: 0
+        if (attempt >= viewModel.maxAttempts) {
             finishAllAttempts()
             return
         }
 
-        currentAttempt++
-        updateCounter()
+        viewModel.incrementAttempt()
         statusText.text = "Logovanie..."
         dropdown.isEnabled = false
         tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
@@ -120,7 +130,8 @@ class BehametricsFragment : Fragment() {
         tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
 
         uploadCurrentLog {
-            if (currentAttempt >= maxAttempts) {
+            val attempt = viewModel.currentAttempt.value ?: 0
+            if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
                 statusText.text = "Pripravený na ďalší pokus"
@@ -131,14 +142,9 @@ class BehametricsFragment : Fragment() {
 
     private fun finishAllAttempts() {
         statusText.text = "Hotovo!"
-        counterText.text = "$maxAttempts / $maxAttempts"
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
         dropdown.isEnabled = false
-    }
-
-    private fun updateCounter() {
-        counterText.text = "$currentAttempt / $maxAttempts"
     }
 
     private fun uploadCurrentLog(onComplete: () -> Unit) {
@@ -151,7 +157,7 @@ class BehametricsFragment : Fragment() {
         }
 
         val files = logDir.listFiles()
-            ?.filter { !it.name.contains("touch", ignoreCase = true) }
+            ?.filter { !it.name.contains("touch", ignoreCase = true) && !it.name.contains("orientation", ignoreCase = true) }
             ?: emptyList()
 
         if (files.isEmpty()) {
@@ -162,11 +168,12 @@ class BehametricsFragment : Fragment() {
 
         statusText.text = "Nahrávanie..."
 
+        val attempt = viewModel.currentAttempt.value ?: 0
         var uploaded = 0
         val total = files.size
 
         for (file in files) {
-            uploadToFirebase(file, currentAttempt) {
+            uploadToFirebase(file, attempt) {
                 uploaded++
                 if (uploaded == total) {
                     onComplete()
@@ -180,8 +187,9 @@ class BehametricsFragment : Fragment() {
         val uri = Uri.fromFile(file)
 
         val userId = UserSession.userId
-        val filename = "${userId}_pokus${attemptNumber}_${file.name}"
-        val ref = storage.reference.child("sensors_logs_behametrics/$selectedActivity/$filename")
+        val activity = viewModel.selectedActivity.value ?: ""
+        val filename = "pokus${attemptNumber}_${file.name}"
+        val ref = storage.reference.child("sensors_logs_behametrics/$activity/$userId/$filename")
 
         ref.putFile(uri)
             .addOnSuccessListener {

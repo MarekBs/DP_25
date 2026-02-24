@@ -1,4 +1,4 @@
-package com.example.dp_app
+package com.example.dp_app.fragments
 
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +11,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.dp_app.R
+import com.example.dp_app.UserSession
+import com.example.dp_app.models.SensorViewModel
 
 class SensorFragment : Fragment() {
 
@@ -21,9 +24,6 @@ class SensorFragment : Fragment() {
     private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
-
-    private var currentAttempt = 0
-    private val maxAttempts = 15
 
     private val handler = Handler(Looper.getMainLooper())
     private var autoStopRunnable: Runnable? = null
@@ -48,8 +48,14 @@ class SensorFragment : Fragment() {
             statusText.text = it
         }
 
+        sensorViewModel.currentAttempt.observe(viewLifecycleOwner) { attempt ->
+            counterText.text = "$attempt / ${sensorViewModel.maxAttempts}"
+            startButton.isEnabled = !(sensorViewModel.isLogging.value ?: false) && attempt < sensorViewModel.maxAttempts
+        }
+
         sensorViewModel.isLogging.observe(viewLifecycleOwner) { isLogging ->
-            startButton.isEnabled = !isLogging && currentAttempt < maxAttempts
+            val attempt = sensorViewModel.currentAttempt.value ?: 0
+            startButton.isEnabled = !isLogging && attempt < sensorViewModel.maxAttempts
             stopButton.isEnabled = isLogging
         }
 
@@ -66,27 +72,25 @@ class SensorFragment : Fragment() {
         }
 
         backButton.visibility = View.GONE
-        updateCounter()
 
         return view
     }
 
     private fun startNextAttempt() {
-        if (currentAttempt >= maxAttempts) {
+        val attempt = sensorViewModel.currentAttempt.value ?: 0
+        if (attempt >= sensorViewModel.maxAttempts) {
             finishAllAttempts()
             return
         }
 
-        currentAttempt++
-        updateCounter()
+        sensorViewModel.incrementAttempt()
         statusText.text = "Logovanie..."
 
-        val userId = UserSession.userId
-        sensorViewModel.desiredFilename = "${userId}_pokus${currentAttempt}"
+        sensorViewModel.desiredFilename = "pokus${sensorViewModel.currentAttempt.value}"
         sensorViewModel.startLogging()
 
         autoStopRunnable = Runnable { stopCurrentLogging() }
-        handler.postDelayed(autoStopRunnable!!, 16000) // 1s oneskorenie + 15s nahrávanie
+        handler.postDelayed(autoStopRunnable!!, 16000)
     }
 
     private fun stopCurrentLogging() {
@@ -94,7 +98,8 @@ class SensorFragment : Fragment() {
         sensorViewModel.stopLogging()
 
         handler.postDelayed({
-            if (currentAttempt >= maxAttempts) {
+            val attempt = sensorViewModel.currentAttempt.value ?: 0
+            if (attempt >= sensorViewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
                 statusText.text = "Pripravený na ďalší pokus"
@@ -105,12 +110,7 @@ class SensorFragment : Fragment() {
 
     private fun finishAllAttempts() {
         statusText.text = "Hotovo!"
-        counterText.text = "$maxAttempts / $maxAttempts"
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
-    }
-
-    private fun updateCounter() {
-        counterText.text = "$currentAttempt / $maxAttempts"
     }
 }

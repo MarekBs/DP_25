@@ -1,4 +1,4 @@
-package com.example.dp_app
+package com.example.dp_app.models
 
 import android.app.Activity
 import android.content.Context
@@ -16,11 +16,27 @@ class BehametricsViewModel : ViewModel() {
     private val _isLogging = MutableLiveData(false)
     val isLogging: LiveData<Boolean> = _isLogging
 
+    private val _currentAttempt = MutableLiveData(0)
+    val currentAttempt: LiveData<Int> = _currentAttempt
+
+    private val _selectedActivity = MutableLiveData("")
+    val selectedActivity: LiveData<String> = _selectedActivity
+
+    val maxAttempts = 15
+
     private lateinit var logDir: File
 
     fun init(context: Context) {
         logDir = File(context.filesDir, "logs")
         if (!logDir.exists()) logDir.mkdirs()
+    }
+
+    fun incrementAttempt() {
+        _currentAttempt.value = (_currentAttempt.value ?: 0) + 1
+    }
+
+    fun setSelectedActivity(activity: String) {
+        _selectedActivity.value = activity
     }
 
     fun startLogging(activity: Activity) {
@@ -51,4 +67,3 @@ class BehametricsViewModel : ViewModel() {
         _status.value = text
     }
 }
-

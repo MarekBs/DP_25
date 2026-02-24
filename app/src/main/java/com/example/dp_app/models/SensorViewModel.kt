@@ -1,4 +1,4 @@
-package com.example.dp_app
+package com.example.dp_app.models
 
 import android.content.Context
 import android.hardware.*
@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.dp_app.UserSession
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileWriter
@@ -26,12 +27,16 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private lateinit var currentFile: File
     var desiredFilename: String = ""
 
-
     private val _status = MutableLiveData("Čakanie na spustenie...")
     val status: LiveData<String> get() = _status
 
     private val _isLogging = MutableLiveData(false)
     val isLogging: LiveData<Boolean> get() = _isLogging
+
+    private val _currentAttempt = MutableLiveData(0)
+    val currentAttempt: LiveData<Int> get() = _currentAttempt
+
+    val maxAttempts = 15
 
     private var lastLogTime = 0L
     private val samplingInterval = 20L // 50 Hz
@@ -51,6 +56,9 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         tone = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
     }
 
+    fun incrementAttempt() {
+        _currentAttempt.value = (_currentAttempt.value ?: 0) + 1
+    }
 
     fun startLogging() {
         if (_isLogging.value == true) return
@@ -61,13 +69,11 @@ class SensorViewModel : ViewModel(), SensorEventListener {
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-
             _isLogging.value = true
             _status.value = "Nahrávanie..."
             isAttitudeInitialized = false
             index = 0
             lastLogTime = 0L
-
 
             val logsDir = File(context!!.filesDir, "logs")
             if (!logsDir.exists()) logsDir.mkdirs()
@@ -88,7 +94,6 @@ class SensorViewModel : ViewModel(), SensorEventListener {
                         "rotationRate.x\trotationRate.y\trotationRate.z\t" +
                         "userAcceleration.x\tuserAcceleration.y\tuserAcceleration.z\n"
             )
-
 
             val delayUs = 20_000
 
@@ -118,7 +123,6 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         _isLogging.value = false
         _status.value = "Zastavovanie..."
 
-
         sensorManager?.unregisterListener(this)
 
         try {
@@ -141,7 +145,8 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private fun uploadToFirebase(file: File, onComplete: () -> Unit) {
         val storage = FirebaseStorage.getInstance()
         val uri = Uri.fromFile(file)
-        val ref = storage.reference.child("logs_motionsense/${file.name}")
+        val userId = UserSession.userId
+        val ref = storage.reference.child("logs_motionsense/$userId/${file.name}")
 
         ref.putFile(uri)
             .addOnSuccessListener {
@@ -224,9 +229,3 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         super.onCleared()
     }
 }
-
-
-
-
-
-

@@ -44,7 +44,7 @@
 
     <fragment
         android:id="@+id/behametricsFragment"
-        android:name="com.example.dp_app.BehametricsFragment"
+        android:name="com.example.dp_app.fragments.BehametricsFragment"
         android:label="BehametricsFragment">
         
         <action
@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/behametricsTouchFragment"
-        android:name="com.example.dp_app.BehametricsTouchFragment"
+        android:name="com.example.dp_app.fragments.BehametricsTouchFragment"
         android:label="BehametricsTouchFragment">
         
         <action
@@ -70,7 +70,7 @@
 
     <fragment
         android:id="@+id/sensorFragment"
-        android:name="com.example.dp_app.SensorFragment"
+        android:name="com.example.dp_app.fragments.SensorFragment"
         android:label="SensorFragment">
         
         <action
