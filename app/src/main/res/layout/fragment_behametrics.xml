@@ -27,7 +27,7 @@
                 android:id="@+id/title_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Behametrics senzory"
+                android:text="Gestá v priestore"
                 android:textSize="20sp"
                 android:textColor="@color/text_primary"
                 android:fontFamily="sans-serif-medium" />
