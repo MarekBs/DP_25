@@ -28,6 +28,7 @@ class BehametricsTouchFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var hintOverlay: View
+    private lateinit var uploadOverlay: View
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +47,7 @@ class BehametricsTouchFragment : Fragment() {
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         hintOverlay = view.findViewById(R.id.hint_overlay)
+        uploadOverlay = view.findViewById(R.id.upload_overlay)
 
         viewModel.init(requireContext())
 
@@ -115,8 +117,10 @@ class BehametricsTouchFragment : Fragment() {
 
     private fun stopCurrentLogging() {
         viewModel.stopLogging(requireActivity())
+        uploadOverlay.visibility = View.VISIBLE
 
         uploadCurrentLog {
+            uploadOverlay.visibility = View.GONE
             val attempt = viewModel.currentAttempt.value ?: 0
             if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()

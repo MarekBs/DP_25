@@ -33,6 +33,8 @@ class BehametricsFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var dropdown: AutoCompleteTextView
+    private lateinit var instructionText: TextView
+    private lateinit var uploadOverlay: View
 
     private lateinit var tone: ToneGenerator
     private val handler = Handler(Looper.getMainLooper())
@@ -53,6 +55,8 @@ class BehametricsFragment : Fragment() {
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         dropdown = view.findViewById(R.id.dropdown)
+        instructionText = view.findViewById(R.id.instruction_text)
+        uploadOverlay = view.findViewById(R.id.upload_overlay)
 
         viewModel.init(requireContext())
         tone = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
@@ -84,7 +88,17 @@ class BehametricsFragment : Fragment() {
         dropdown.setAdapter(adapter)
 
         dropdown.setOnItemClickListener { parent, _, position, _ ->
-            viewModel.setSelectedActivity(parent.getItemAtPosition(position).toString())
+            val selected = parent.getItemAtPosition(position).toString()
+            viewModel.setSelectedActivity(selected)
+            val instructions = when (selected) {
+                "Položenie na stôl" ->
+                    "Trvanie: ~3 sekundy (zastaví sa automaticky)\nPohyb: položte mobil obrazovkou nahor na rovnú plochu\nPoloha: začnite s mobilom v ruke, potom ho položte"
+                "Zdvihnutie k uchu" ->
+                    "Trvanie: ~3 sekundy (zastaví sa automaticky)\nPohyb: zdvihnite mobil k uchu ako pri telefonovaní\nPoloha: začnite s mobilom pred sebou"
+                else -> ""
+            }
+            instructionText.text = instructions
+            instructionText.visibility = if (instructions.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
         }
 
         startButton.setOnClickListener {
@@ -129,8 +143,10 @@ class BehametricsFragment : Fragment() {
         autoStopRunnable?.let { handler.removeCallbacks(it) }
         viewModel.stopLogging(requireActivity())
         tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+        uploadOverlay.visibility = View.VISIBLE
 
         uploadCurrentLog {
+            uploadOverlay.visibility = View.GONE
             val attempt = viewModel.currentAttempt.value ?: 0
             if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()

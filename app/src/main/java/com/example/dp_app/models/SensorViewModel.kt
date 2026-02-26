@@ -33,6 +33,9 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private val _isLogging = MutableLiveData(false)
     val isLogging: LiveData<Boolean> get() = _isLogging
 
+    private val _isUploading = MutableLiveData(false)
+    val isUploading: LiveData<Boolean> get() = _isUploading
+
     private val _currentAttempt = MutableLiveData(0)
     val currentAttempt: LiveData<Int> get() = _currentAttempt
 
@@ -135,8 +138,10 @@ class SensorViewModel : ViewModel(), SensorEventListener {
         tone?.startTone(ToneGenerator.TONE_PROP_NACK, 300)
 
         _status.value = "⬆ Nahrávanie na server..."
+        _isUploading.postValue(true)
 
         uploadToFirebase(currentFile) {
+            _isUploading.postValue(false)
             _status.postValue("Súbory nahrané ✅")
         }
     }

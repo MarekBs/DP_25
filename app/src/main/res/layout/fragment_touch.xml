@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_primary">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
     <LinearLayout
@@ -114,6 +118,15 @@
         android:paddingHorizontal="24dp"
         android:paddingBottom="24dp">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trvanie: prelistujte obrázky a zastavte manuálne\nDržanie: mobil držte jednou rukou pred sebou\nGesto: prstom potiahnite doľava alebo doprava"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="16dp" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/start_button"
             android:layout_width="match_parent"
@@ -152,4 +165,37 @@
 
     </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/upload_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC1F2937"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ProgressBar
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:indeterminateTint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ukladanie pokusu..."
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>
