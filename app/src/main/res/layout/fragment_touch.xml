@@ -42,11 +42,21 @@
             android:id="@+id/counter_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 / 15"
+            android:text="0 / 10"
             android:textSize="28sp"
             android:textColor="@color/accent_soft"
             android:fontFamily="sans-serif-light"
             android:layout_marginTop="12dp" />
+
+        <TextView
+            android:id="@+id/direction_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→  DOPRAVA"
+            android:textSize="22sp"
+            android:textColor="@color/accent"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="8dp" />
 
     </LinearLayout>
 
@@ -90,7 +100,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Potiahnite prstom doľava alebo doprava"
+                    android:text="Swipujte obrázky podľa pokynov"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:fontFamily="sans-serif-medium"
@@ -99,7 +109,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="na prepínanie obrázkov"
+                    android:text="5 kôl doprava, potom 5 kôl doľava"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:layout_marginTop="4dp" />
@@ -121,7 +131,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Trvanie: prelistujte obrázky a zastavte manuálne\nDržanie: mobil držte jednou rukou pred sebou\nGesto: prstom potiahnite doľava alebo doprava"
+            android:text="Kolá 1–5: swipujte DOPRAVA cez všetky obrázky\nKolá 6–10: swipujte DOĽAVA cez všetky obrázky\nDržanie: mobil jednou rukou pred sebou"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:lineSpacingMultiplier="1.4"

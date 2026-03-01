@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -27,8 +28,57 @@ class BehametricsTouchFragment : Fragment() {
     private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
+    private lateinit var directionText: TextView
     private lateinit var hintOverlay: View
     private lateinit var uploadOverlay: View
+    private lateinit var viewPager: ViewPager2
+
+    private val images = listOf(
+        R.drawable.num1,
+        R.drawable.num2,
+        R.drawable.num3,
+        R.drawable.num4,
+        R.drawable.num5,
+        R.drawable.num6,
+        R.drawable.num7,
+        R.drawable.num8,
+        R.drawable.num9,
+        R.drawable.num10
+    )
+
+    // Kolá 1-5 = DOPRAVA, kolá 6-10 = DOĽAVA
+    private val totalRounds = 10
+    private val rightRoundsCount = 5
+
+    private var roundActive = false
+    private var lastPage = 0
+
+    private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            if (!roundActive) return
+
+            val currentRound = viewModel.currentAttempt.value ?: 0
+            val isRightPhase = currentRound <= rightRoundsCount
+
+            // Upozornenie pri swipe v zlom smere
+            if (isRightPhase && position < lastPage) {
+                Toast.makeText(requireContext(), "Swipujte DOPRAVA →", Toast.LENGTH_SHORT).show()
+            } else if (!isRightPhase && position > lastPage) {
+                Toast.makeText(requireContext(), "← Swipujte DOĽAVA", Toast.LENGTH_SHORT).show()
+            }
+
+            lastPage = position
+
+            // Kolo je hotové keď sa dostane na koniec/začiatok
+            val roundComplete = if (isRightPhase) {
+                position == images.size - 1
+            } else {
+                position == 0
+            }
+
+            if (roundComplete) finishRound()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,102 +96,120 @@ class BehametricsTouchFragment : Fragment() {
         stopButton = view.findViewById(R.id.stop_button)
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
+        directionText = view.findViewById(R.id.direction_text)
         hintOverlay = view.findViewById(R.id.hint_overlay)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
+        viewPager = view.findViewById(R.id.viewPager)
 
         viewModel.init(requireContext())
+        viewPager.adapter = ImageAdapter(images)
+        viewPager.registerOnPageChangeCallback(pageChangeCallback)
 
         viewModel.status.observe(viewLifecycleOwner) {
             statusText.text = it
         }
 
-        viewModel.currentAttempt.observe(viewLifecycleOwner) { attempt ->
-            counterText.text = "$attempt / ${viewModel.maxAttempts}"
-            startButton.isEnabled = !(viewModel.isLogging.value ?: false) && attempt < viewModel.maxAttempts
+        viewModel.currentAttempt.observe(viewLifecycleOwner) { round ->
+            counterText.text = "$round / $totalRounds"
+            updateDirectionUI(round)
         }
 
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
-            val attempt = viewModel.currentAttempt.value ?: 0
-            startButton.isEnabled = !logging && attempt < viewModel.maxAttempts
+            val round = viewModel.currentAttempt.value ?: 0
+            startButton.isEnabled = !logging && !roundActive && round < totalRounds
             stopButton.isEnabled = logging
         }
 
-        startButton.setOnClickListener {
-            startNextAttempt()
-        }
-
-        stopButton.setOnClickListener {
-            stopCurrentLogging()
-        }
+        startButton.setOnClickListener { startNextRound() }
+        stopButton.setOnClickListener { finishRound() }
 
         backButton.setOnClickListener {
             findNavController().navigate(R.id.action_behametricsTouchFragment_to_introFragment)
         }
 
-        val images = listOf(
-            R.drawable.num1,
-            R.drawable.num2,
-            R.drawable.num3,
-            R.drawable.num4,
-            R.drawable.num5,
-            R.drawable.num6,
-            R.drawable.num7,
-            R.drawable.num8,
-            R.drawable.num9,
-            R.drawable.num10
-        )
-
-        val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
-        viewPager.adapter = ImageAdapter(images)
-
         backButton.visibility = View.GONE
+        updateDirectionUI(0)
     }
 
-    private fun startNextAttempt() {
-        val attempt = viewModel.currentAttempt.value ?: 0
-        if (attempt >= viewModel.maxAttempts) {
-            finishAllAttempts()
-            return
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewPager.unregisterOnPageChangeCallback(pageChangeCallback)
+    }
 
-        if (attempt == 0) {
+    private fun startNextRound() {
+        val round = viewModel.currentAttempt.value ?: 0
+        if (round >= totalRounds) { finishAll(); return }
+
+        if (round == 0) {
             hintOverlay.animate().alpha(0f).setDuration(300).withEndAction {
                 hintOverlay.visibility = View.GONE
             }.start()
         }
 
         viewModel.incrementAttempt()
+        val newRound = viewModel.currentAttempt.value ?: 0
+        roundActive = true
+
+        // Nastav ViewPager na štartovaciu pozíciu pre daný smer
+        val isRightPhase = newRound <= rightRoundsCount
+        if (isRightPhase) {
+            viewPager.setCurrentItem(0, false)
+            lastPage = 0
+        } else {
+            viewPager.setCurrentItem(images.size - 1, false)
+            lastPage = images.size - 1
+        }
+
         statusText.text = "Logovanie..."
         viewModel.startLogging(requireActivity())
     }
 
-    private fun stopCurrentLogging() {
+    private fun finishRound() {
+        if (!roundActive) return
+        roundActive = false
         viewModel.stopLogging(requireActivity())
-        uploadOverlay.visibility = View.VISIBLE
 
-        uploadCurrentLog {
+        val round = viewModel.currentAttempt.value ?: 0
+        val direction = if (round <= rightRoundsCount) "doprava" else "dolava"
+
+        uploadOverlay.visibility = View.VISIBLE
+        uploadCurrentLog(direction) {
             uploadOverlay.visibility = View.GONE
-            val attempt = viewModel.currentAttempt.value ?: 0
-            if (attempt >= viewModel.maxAttempts) {
-                finishAllAttempts()
+            if (round >= totalRounds) {
+                finishAll()
             } else {
-                statusText.text = "Pripravený na ďalší pokus"
+                statusText.text = "Kolo $round hotové! Stlačte tlačidlo pre ďalšie."
                 startButton.isEnabled = true
             }
         }
     }
 
-    private fun finishAllAttempts() {
-        statusText.text = "Hotovo!"
+    private fun finishAll() {
+        statusText.text = "Hotovo! Všetky kolá dokončené."
+        directionText.text = ""
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
+        stopButton.isEnabled = false
     }
 
-    private fun uploadCurrentLog(onComplete: () -> Unit) {
+    private fun updateDirectionUI(round: Int) {
+        val nextRound = round + 1
+        if (nextRound > totalRounds) return
+
+        val isNextRight = nextRound <= rightRoundsCount
+        if (isNextRight) {
+            directionText.text = "→  DOPRAVA"
+            startButton.text = "Spustiť kolo $nextRound  →"
+        } else {
+            directionText.text = "←  DOĽAVA"
+            startButton.text = "←  Spustiť kolo $nextRound"
+        }
+    }
+
+    private fun uploadCurrentLog(direction: String, onComplete: () -> Unit) {
         val logDir = File(requireContext().filesDir, "logs")
 
         if (!logDir.exists()) {
-            statusText.text = "Priečinok logov nenájdený"
             onComplete()
             return
         }
@@ -151,43 +219,30 @@ class BehametricsTouchFragment : Fragment() {
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "Žiadne logy"
             onComplete()
             return
         }
 
-        statusText.text = "Nahrávanie..."
-
-        val attempt = viewModel.currentAttempt.value ?: 0
+        val round = viewModel.currentAttempt.value ?: 0
         var uploaded = 0
-        val total = files.size
 
         for (file in files) {
-            uploadToFirebaseTouch(file, attempt) {
-                uploaded++
-                if (uploaded == total) {
-                    onComplete()
+            val userId = UserSession.userId
+            val filename = "kolo${round}_${direction}_${file.name}"
+            val ref = FirebaseStorage.getInstance().reference
+                .child("touch_gallery_behametrics/$direction/$userId/$filename")
+
+            ref.putFile(Uri.fromFile(file))
+                .addOnSuccessListener {
+                    file.writeText("")
+                    uploaded++
+                    if (uploaded == files.size) onComplete()
                 }
-            }
+                .addOnFailureListener {
+                    statusText.text = "Chyba: ${it.message}"
+                    uploaded++
+                    if (uploaded == files.size) onComplete()
+                }
         }
-    }
-
-    private fun uploadToFirebaseTouch(file: File, attemptNumber: Int, onFinish: () -> Unit) {
-        val storage = FirebaseStorage.getInstance()
-        val uri = Uri.fromFile(file)
-
-        val userId = UserSession.userId
-        val filename = "log${attemptNumber}_${file.name}"
-        val ref = storage.reference.child("touch_gallery_behametrics/$userId/$filename")
-
-        ref.putFile(uri)
-            .addOnSuccessListener {
-                file.writeText("")
-                onFinish()
-            }
-            .addOnFailureListener {
-                statusText.text = "Chyba: ${it.message}"
-                onFinish()
-            }
     }
 }
