@@ -30,6 +30,10 @@ class CropFragment : Fragment() {
     private lateinit var hintOverlay: View
     private lateinit var uploadOverlay: View
 
+    private var maxScale = 1f
+    private var autoStopped = false
+    private var isAmplifying = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -95,20 +99,29 @@ class CropFragment : Fragment() {
 
         val scaleX = frameSize / imageWidth
         val scaleY = frameSize / imageHeight
-        val maxScale = maxOf(scaleX, scaleY)
+        maxScale = maxOf(scaleX, scaleY)
 
         photoView.minimumScale = 1f
         photoView.maximumScale = maxScale
+        photoView.setScaleLevels(1f, maxScale / 2f, maxScale)
 
-        photoView.setScaleLevels(
-            1.0f,
-            1.005f,
-            maxScale
-        )
+        photoView.setOnScaleChangeListener { scaleFactor, focusX, focusY ->
+            if (!isAmplifying) {
+                isAmplifying = true
+                val amplified = 1f + (scaleFactor - 1f) * 1.2f
+                val newScale = (photoView.scale * amplified).coerceIn(1f, maxScale)
+                photoView.setScale(newScale, focusX, focusY, false)
+                isAmplifying = false
+            }
+            if (!autoStopped && viewModel.isLogging.value == true && photoView.scale >= maxScale * 0.98f) {
+                autoStopped = true
+                stopCurrentLogging()
+            }
+        }
     }
 
     private fun resetZoom() {
-        photoView.setScale(1f, true)
+        photoView.setScale(1f, false)
     }
 
     private fun startNextAttempt() {
@@ -124,6 +137,8 @@ class CropFragment : Fragment() {
             }.start()
         }
 
+        autoStopped = false
+        isAmplifying = false
         viewModel.incrementAttempt()
         statusText.text = "Logovanie..."
         viewModel.startLogging(requireActivity())
@@ -132,16 +147,17 @@ class CropFragment : Fragment() {
     private fun stopCurrentLogging() {
         viewModel.stopLogging(requireActivity())
         resetZoom()
+        photoView.isEnabled = false
         uploadOverlay.visibility = View.VISIBLE
 
         uploadCurrentLog {
             uploadOverlay.visibility = View.GONE
+            photoView.isEnabled = true
             val attempt = viewModel.currentAttempt.value ?: 0
             if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
-                statusText.text = "Pripravený na ďalší pokus"
-                startButton.isEnabled = true
+                startNextAttempt()
             }
         }
     }
