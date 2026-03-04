@@ -42,7 +42,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     val maxAttempts = 15
 
     private var lastLogTime = 0L
-    private val samplingInterval = 20L // 50 Hz
+    private val samplingInterval = 20L
 
     private var isAttitudeInitialized = false
 

@@ -47,7 +47,6 @@ class BehametricsTouchFragment : Fragment() {
         R.drawable.num10
     )
 
-    // Kolá 1-5 = DOPRAVA, kolá 6-10 = DOĽAVA
     private val totalRounds = 10
     private val rightRoundsCount = 5
 
@@ -61,7 +60,6 @@ class BehametricsTouchFragment : Fragment() {
             val currentRound = viewModel.currentAttempt.value ?: 0
             val isRightPhase = currentRound <= rightRoundsCount
 
-            // Upozornenie pri swipe v zlom smere
             if (isRightPhase && position < lastPage) {
                 Toast.makeText(requireContext(), "Pokračujte DOPRAVA →", Toast.LENGTH_SHORT).show()
             } else if (!isRightPhase && position > lastPage) {
@@ -70,7 +68,6 @@ class BehametricsTouchFragment : Fragment() {
 
             lastPage = position
 
-            // Kolo je hotové keď sa dostane na koniec/začiatok
             val roundComplete = if (isRightPhase) {
                 position == images.size - 1
             } else {
@@ -113,7 +110,7 @@ class BehametricsTouchFragment : Fragment() {
 
         viewModel.currentAttempt.observe(viewLifecycleOwner) { round ->
             counterText.text = "$round / $totalRounds"
-            updateDirectionUI(round)
+            if (!roundActive) updateDirectionUI(round)
         }
 
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
@@ -152,14 +149,15 @@ class BehametricsTouchFragment : Fragment() {
         val newRound = viewModel.currentAttempt.value ?: 0
         roundActive = true
 
-        // Nastav ViewPager na štartovaciu pozíciu pre daný smer
         val isRightPhase = newRound <= rightRoundsCount
         if (isRightPhase) {
             viewPager.setCurrentItem(0, false)
             lastPage = 0
+            directionText.text = "→  DOPRAVA"
         } else {
             viewPager.setCurrentItem(images.size - 1, false)
             lastPage = images.size - 1
+            directionText.text = "←  DOĽAVA"
         }
 
         statusText.text = "Prebieha záznam..."
@@ -181,6 +179,7 @@ class BehametricsTouchFragment : Fragment() {
                 finishAll()
             } else {
                 statusText.text = "Kolo $round dokončené. Pokračujte stlačením tlačidla."
+                updateDirectionUI(round)
                 startButton.isEnabled = true
             }
         }
