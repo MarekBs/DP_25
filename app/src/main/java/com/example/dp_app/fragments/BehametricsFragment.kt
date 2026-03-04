@@ -162,6 +162,7 @@ class BehametricsFragment : Fragment() {
     private fun finishAllAttempts() {
         startButton.isEnabled = false
         dropdown.isEnabled = false
+        UserSession.markCompleted(requireContext(), "sensors_${viewModel.selectedActivity.value}")
         successOverlay.visibility = View.VISIBLE
         successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
             findNavController().navigate(R.id.action_behametricsFragment_to_introFragment)

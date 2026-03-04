@@ -188,6 +188,7 @@ class BehametricsTouchFragment : Fragment() {
     private fun finishAll() {
         startButton.isEnabled = false
         stopButton.isEnabled = false
+        UserSession.markCompleted(requireContext(), "touch")
         successOverlay.visibility = View.VISIBLE
         successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
             findNavController().navigate(R.id.action_behametricsTouchFragment_to_introFragment)

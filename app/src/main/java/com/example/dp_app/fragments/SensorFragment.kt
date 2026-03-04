@@ -118,6 +118,7 @@ class SensorFragment : Fragment() {
 
     private fun finishAllAttempts() {
         startButton.isEnabled = false
+        UserSession.markCompleted(requireContext(), "logging")
         successOverlay.visibility = View.VISIBLE
         successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
             findNavController().navigate(R.id.action_sensorFragment_to_introFragment)
