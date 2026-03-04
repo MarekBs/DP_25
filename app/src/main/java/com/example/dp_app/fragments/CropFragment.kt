@@ -29,6 +29,7 @@ class CropFragment : Fragment() {
     private lateinit var counterText: TextView
     private lateinit var hintOverlay: View
     private lateinit var uploadOverlay: View
+    private lateinit var successOverlay: View
 
     private var maxScale = 1f
     private var autoStopped = false
@@ -57,6 +58,7 @@ class CropFragment : Fragment() {
         counterText = view.findViewById(R.id.counter_text)
         hintOverlay = view.findViewById(R.id.hint_overlay)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
+        successOverlay = view.findViewById(R.id.success_overlay)
 
         viewModel.init(requireContext())
 
@@ -163,9 +165,11 @@ class CropFragment : Fragment() {
     }
 
     private fun finishAllAttempts() {
-        statusText.text = "Hotovo!"
-        backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
+        successOverlay.visibility = View.VISIBLE
+        successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
+            findNavController().navigate(R.id.action_cropFragment_to_introFragment)
+        }
     }
 
     private fun uploadCurrentLog(onComplete: () -> Unit) {

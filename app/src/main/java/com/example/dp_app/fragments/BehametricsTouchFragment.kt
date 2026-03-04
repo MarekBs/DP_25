@@ -31,6 +31,7 @@ class BehametricsTouchFragment : Fragment() {
     private lateinit var directionText: TextView
     private lateinit var hintOverlay: View
     private lateinit var uploadOverlay: View
+    private lateinit var successOverlay: View
     private lateinit var viewPager: ViewPager2
 
     private val images = listOf(
@@ -99,6 +100,7 @@ class BehametricsTouchFragment : Fragment() {
         directionText = view.findViewById(R.id.direction_text)
         hintOverlay = view.findViewById(R.id.hint_overlay)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
+        successOverlay = view.findViewById(R.id.success_overlay)
         viewPager = view.findViewById(R.id.viewPager)
 
         viewModel.init(requireContext())
@@ -185,11 +187,12 @@ class BehametricsTouchFragment : Fragment() {
     }
 
     private fun finishAll() {
-        statusText.text = "Všetky kolá boli úspešne dokončené."
-        directionText.text = ""
-        backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
         stopButton.isEnabled = false
+        successOverlay.visibility = View.VISIBLE
+        successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
+            findNavController().navigate(R.id.action_behametricsTouchFragment_to_introFragment)
+        }
     }
 
     private fun updateDirectionUI(round: Int) {

@@ -35,6 +35,7 @@ class BehametricsFragment : Fragment() {
     private lateinit var dropdown: AutoCompleteTextView
     private lateinit var instructionText: TextView
     private lateinit var uploadOverlay: View
+    private lateinit var successOverlay: View
 
     private lateinit var tone: ToneGenerator
     private val handler = Handler(Looper.getMainLooper())
@@ -57,6 +58,7 @@ class BehametricsFragment : Fragment() {
         dropdown = view.findViewById(R.id.dropdown)
         instructionText = view.findViewById(R.id.instruction_text)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
+        successOverlay = view.findViewById(R.id.success_overlay)
 
         viewModel.init(requireContext())
         tone = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100)
@@ -158,10 +160,12 @@ class BehametricsFragment : Fragment() {
     }
 
     private fun finishAllAttempts() {
-        statusText.text = "Všetky pokusy boli úspešne dokončené."
-        backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
         dropdown.isEnabled = false
+        successOverlay.visibility = View.VISIBLE
+        successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
+            findNavController().navigate(R.id.action_behametricsFragment_to_introFragment)
+        }
     }
 
     private fun uploadCurrentLog(onComplete: () -> Unit) {

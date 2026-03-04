@@ -187,4 +187,61 @@
 
     </FrameLayout>
 
+    <FrameLayout
+        android:id="@+id/success_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC1F2937"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="32dp">
+
+            <TextView
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:text="✓"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:gravity="center"
+                android:background="@drawable/check_circle_bg" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logovanie úspešné!"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginTop="24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Všetky pokusy boli úspešne uložené."
+                android:textColor="#B0BEC5"
+                android:textSize="14sp"
+                android:layout_marginTop="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/success_menu_button"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:text="Hlavné menu"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:layout_marginTop="32dp"
+                app:backgroundTint="@color/accent"
+                app:cornerRadius="12dp"
+                app:elevation="0dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 </FrameLayout>

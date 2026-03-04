@@ -25,6 +25,7 @@ class SensorFragment : Fragment() {
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var uploadOverlay: View
+    private lateinit var successOverlay: View
 
     private val handler = Handler(Looper.getMainLooper())
     private var autoStopRunnable: Runnable? = null
@@ -43,6 +44,7 @@ class SensorFragment : Fragment() {
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
+        successOverlay = view.findViewById(R.id.success_overlay)
 
         sensorViewModel.init(requireContext())
 
@@ -115,8 +117,10 @@ class SensorFragment : Fragment() {
     }
 
     private fun finishAllAttempts() {
-        statusText.text = "Všetky pokusy boli úspešne dokončené."
-        backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
+        successOverlay.visibility = View.VISIBLE
+        successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
+            findNavController().navigate(R.id.action_sensorFragment_to_introFragment)
+        }
     }
 }
