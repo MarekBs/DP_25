@@ -46,10 +46,10 @@ class LoginFragment : Fragment() {
     }
 
     private fun checkIfIdExists(userId: String) {
-        val markerRef = FirebaseStorage.getInstance()
-            .reference.child("registered_users/$userId/marker.txt")
+        val profileRef = FirebaseStorage.getInstance()
+            .reference.child("user_profiles/$userId/profile.txt")
 
-        markerRef.metadata
+        profileRef.metadata
             .addOnSuccessListener {
                 loginButton.isEnabled = true
                 showConfirmDialog(userId)
@@ -58,7 +58,7 @@ class LoginFragment : Fragment() {
                 loginButton.isEnabled = true
                 val code = (exception as? StorageException)?.errorCode
                 if (code == StorageException.ERROR_OBJECT_NOT_FOUND) {
-                    createMarkerAndLogin(userId)
+                    proceedToSurvey(userId)
                 } else {
                     Toast.makeText(requireContext(), "Chyba pripojenia: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -74,17 +74,13 @@ class LoginFragment : Fragment() {
             .show()
     }
 
-    private fun createMarkerAndLogin(userId: String) {
-        val markerRef = FirebaseStorage.getInstance()
-            .reference.child("registered_users/$userId/marker.txt")
-
-        markerRef.putBytes(userId.toByteArray())
-            .addOnSuccessListener { proceedLogin(userId) }
-            .addOnFailureListener { proceedLogin(userId) }
-    }
-
     private fun proceedLogin(userId: String) {
         UserSession.userId = userId
         findNavController().navigate(R.id.action_loginFragment_to_introFragment)
+    }
+
+    private fun proceedToSurvey(userId: String) {
+        UserSession.userId = userId
+        findNavController().navigate(R.id.action_loginFragment_to_surveyFragment)
     }
 }

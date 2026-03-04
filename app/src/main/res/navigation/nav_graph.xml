@@ -8,11 +8,29 @@
         android:id="@+id/loginFragment"
         android:name="com.example.dp_app.fragments.LoginFragment"
         android:label="Login">
-        
+
         <action
             android:id="@+id/action_loginFragment_to_introFragment"
             app:destination="@id/introFragment"
             app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_loginFragment_to_surveyFragment"
+            app:destination="@id/surveyFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/surveyFragment"
+        android:name="com.example.dp_app.fragments.SurveyFragment"
+        android:label="Survey">
+
+        <action
+            android:id="@+id/action_surveyFragment_to_introFragment"
+            app:destination="@id/introFragment"
+            app:popUpTo="@id/surveyFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
