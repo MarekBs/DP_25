@@ -92,7 +92,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:background="#DD1F2937">
+                android:background="@color/hint_overlay_bg">
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:layout_width="120dp"
