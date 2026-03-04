@@ -90,7 +90,7 @@ class SensorFragment : Fragment() {
         }
 
         sensorViewModel.incrementAttempt()
-        statusText.text = "Logovanie..."
+        statusText.text = "Prebieha záznam..."
 
         sensorViewModel.desiredFilename = "log${sensorViewModel.currentAttempt.value}"
         sensorViewModel.startLogging()
@@ -108,14 +108,14 @@ class SensorFragment : Fragment() {
             if (attempt >= sensorViewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
-                statusText.text = "Pripravený na ďalší pokus"
+                statusText.text = "Pokus uložený. Pripravený na ďalší."
                 startButton.isEnabled = true
             }
         }, 2000)
     }
 
     private fun finishAllAttempts() {
-        statusText.text = "Hotovo!"
+        statusText.text = "Všetky pokusy boli úspešne dokončené."
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
     }

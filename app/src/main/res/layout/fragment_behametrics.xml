@@ -36,7 +36,7 @@
                 android:id="@+id/status_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pripravený"
+                android:text="Pripravený na záznam"
                 android:textSize="13sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp" />
@@ -97,7 +97,7 @@
                 android:id="@+id/dropdown"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Vyber aktivitu"
+                android:hint="Vyberte aktivitu"
                 android:padding="16dp"
                 android:textSize="15sp"
                 android:textColor="@color/text_primary"
@@ -178,7 +178,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukladanie pokusu..."
+                android:text="Ukladanie záznamu..."
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp" />

@@ -32,7 +32,7 @@
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pripravený"
+            android:text="Pripravený na záznam"
             android:textSize="13sp"
             android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp" />
@@ -100,7 +100,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Swipujte obrázky podľa pokynov"
+                    android:text="Prechádzajte obrázky podľa pokynov"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:fontFamily="sans-serif-medium"
@@ -131,7 +131,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Kolá 1–5: swipujte DOPRAVA cez všetky obrázky\nKolá 6–10: swipujte DOĽAVA cez všetky obrázky\nDržanie: mobil jednou rukou pred sebou"
+            android:text="Kolá 1–5: prechádzajte obrázky DOPRAVA\nKolá 6–10: prechádzajte obrázky DOĽAVA\nDržanie: zariadenie jednou rukou pred sebou"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:lineSpacingMultiplier="1.4"
@@ -199,7 +199,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukladanie pokusu..."
+                android:text="Ukladanie záznamu..."
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp" />

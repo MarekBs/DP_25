@@ -92,9 +92,9 @@ class BehametricsFragment : Fragment() {
             viewModel.setSelectedActivity(selected)
             val instructions = when (selected) {
                 "Položenie na stôl" ->
-                    "Trvanie: ~3 sekundy (zastaví sa automaticky)\nPohyb: položte mobil obrazovkou nahor na rovnú plochu\nPoloha: začnite s mobilom v ruke, potom ho položte"
+                    "Trvanie: ~3 sekundy – zastaví sa automaticky\nGesto: položte zariadenie obrazovkou nahor na rovnú plochu\nVýchodzia poloha: zariadenie držte v ruke, potom ho plynulo položte"
                 "Zdvihnutie k uchu" ->
-                    "Trvanie: ~3 sekundy (zastaví sa automaticky)\nPohyb: zdvihnite mobil k uchu ako pri telefonovaní\nPoloha: začnite s mobilom pred sebou"
+                    "Trvanie: ~3 sekundy – zastaví sa automaticky\nGesto: zdvihnite zariadenie k uchu plynulým pohybom\nVýchodzia poloha: zariadenie držte pred sebou"
                 else -> ""
             }
             instructionText.text = instructions
@@ -103,7 +103,7 @@ class BehametricsFragment : Fragment() {
 
         startButton.setOnClickListener {
             if (viewModel.selectedActivity.value.isNullOrBlank()) {
-                Toast.makeText(requireContext(), "Vyberte aktivitu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Najskôr vyberte aktivitu.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             startNextAttempt()
@@ -130,7 +130,7 @@ class BehametricsFragment : Fragment() {
         }
 
         viewModel.incrementAttempt()
-        statusText.text = "Logovanie..."
+        statusText.text = "Prebieha záznam..."
         dropdown.isEnabled = false
         tone.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
         viewModel.startLogging(requireActivity())
@@ -151,14 +151,14 @@ class BehametricsFragment : Fragment() {
             if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()
             } else {
-                statusText.text = "Pripravený na ďalší pokus"
+                statusText.text = "Pokus uložený. Pripravený na ďalší."
                 startButton.isEnabled = true
             }
         }
     }
 
     private fun finishAllAttempts() {
-        statusText.text = "Hotovo!"
+        statusText.text = "Všetky pokusy boli úspešne dokončené."
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false
         dropdown.isEnabled = false
@@ -168,7 +168,7 @@ class BehametricsFragment : Fragment() {
         val logDir = File(requireContext().filesDir, "logs")
 
         if (!logDir.exists()) {
-            statusText.text = "Priečinok logov nenájdený"
+            statusText.text = "Dáta záznamu neboli nájdené."
             onComplete()
             return
         }
@@ -178,12 +178,12 @@ class BehametricsFragment : Fragment() {
             ?: emptyList()
 
         if (files.isEmpty()) {
-            statusText.text = "Žiadne logy"
+            statusText.text = "Žiadne záznamy na odoslanie."
             onComplete()
             return
         }
 
-        statusText.text = "Nahrávanie..."
+        statusText.text = "Ukladanie dát na server..."
 
         val attempt = viewModel.currentAttempt.value ?: 0
         var uploaded = 0
@@ -214,7 +214,7 @@ class BehametricsFragment : Fragment() {
                 onFinish()
             }
             .addOnFailureListener {
-                statusText.text = "Chyba: ${it.message}"
+                statusText.text = "Chyba pri odosielaní: ${it.message}"
                 onFinish()
             }
     }

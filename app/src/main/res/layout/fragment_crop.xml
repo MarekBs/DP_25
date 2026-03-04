@@ -32,7 +32,7 @@
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pripravený"
+            android:text="Pripravený na záznam"
             android:textSize="13sp"
             android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp" />
@@ -105,7 +105,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Priblížte dvoma prstami"
+                    android:text="Priblížte obrázok gestom zoom"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:fontFamily="sans-serif-medium"
@@ -114,7 +114,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="na priblíženie obrázka"
+                    android:text="pohybom prstov od seba"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:layout_marginTop="4dp" />
@@ -136,7 +136,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Trvanie: priblížte obrázok a zastavte manuálne\nDržanie: mobil držte oboma rukami pred sebou\nGesto: dvoma prstami priblížte alebo oddiaľte obrázok"
+            android:text="Trvanie: zastaví sa automaticky pri maximálnom priblížení\nDržanie: zariadenie jednou rukou pred sebou\nGesto: druhou rukou priblížte obrázok pohybom prstov od seba"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:lineSpacingMultiplier="1.4"
@@ -204,7 +204,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukladanie pokusu..."
+                android:text="Ukladanie záznamu..."
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp" />

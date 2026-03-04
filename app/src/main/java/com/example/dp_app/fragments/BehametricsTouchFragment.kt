@@ -62,9 +62,9 @@ class BehametricsTouchFragment : Fragment() {
 
             // Upozornenie pri swipe v zlom smere
             if (isRightPhase && position < lastPage) {
-                Toast.makeText(requireContext(), "Swipujte DOPRAVA →", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Pokračujte DOPRAVA →", Toast.LENGTH_SHORT).show()
             } else if (!isRightPhase && position > lastPage) {
-                Toast.makeText(requireContext(), "← Swipujte DOĽAVA", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "← Pokračujte DOĽAVA", Toast.LENGTH_SHORT).show()
             }
 
             lastPage = position
@@ -160,7 +160,7 @@ class BehametricsTouchFragment : Fragment() {
             lastPage = images.size - 1
         }
 
-        statusText.text = "Logovanie..."
+        statusText.text = "Prebieha záznam..."
         viewModel.startLogging(requireActivity())
     }
 
@@ -178,14 +178,14 @@ class BehametricsTouchFragment : Fragment() {
             if (round >= totalRounds) {
                 finishAll()
             } else {
-                statusText.text = "Kolo $round hotové! Stlačte tlačidlo pre ďalšie."
+                statusText.text = "Kolo $round dokončené. Pokračujte stlačením tlačidla."
                 startButton.isEnabled = true
             }
         }
     }
 
     private fun finishAll() {
-        statusText.text = "Hotovo! Všetky kolá dokončené."
+        statusText.text = "Všetky kolá boli úspešne dokončené."
         directionText.text = ""
         backButton.visibility = View.VISIBLE
         startButton.isEnabled = false

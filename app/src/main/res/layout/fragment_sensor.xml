@@ -36,7 +36,7 @@
                 android:id="@+id/status_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pripravený"
+                android:text="Pripravený na záznam"
                 android:textSize="13sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp" />
@@ -82,7 +82,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Trvanie: ~16 sekúnd (zastaví sa automaticky)\nDržanie: mobil vložte do vrecka\nPohyb: choďte normálnym tempom po rovnej ploche"
+            android:text="Trvanie: ~16 sekúnd – zastaví sa automaticky\nUmiestnenie: zariadenie vložte do vrecka\nPohyb: choďte normálnym tempom po rovnom povrchu"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:lineSpacingMultiplier="1.4"
@@ -150,7 +150,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukladanie pokusu..."
+                android:text="Ukladanie záznamu..."
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp" />
