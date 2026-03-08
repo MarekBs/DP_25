@@ -16,8 +16,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingTop="24dp"
-        android:paddingBottom="16dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="4dp">
 
         <TextView
             android:id="@+id/title_text"
@@ -52,11 +52,13 @@
             android:id="@+id/direction_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="→  DOPRAVA"
-            android:textSize="22sp"
+            android:text="→"
+            android:textSize="80sp"
             android:textColor="@color/accent"
             android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="8dp" />
+            android:lineSpacingMultiplier="0.6"
+            android:includeFontPadding="false"
+            android:layout_marginTop="2dp" />
 
     </LinearLayout>
 

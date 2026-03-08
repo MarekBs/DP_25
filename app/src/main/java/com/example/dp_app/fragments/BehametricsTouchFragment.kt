@@ -60,9 +60,9 @@ class BehametricsTouchFragment : Fragment() {
             val isRightPhase = currentRound <= rightRoundsCount
 
             if (isRightPhase && position < lastPage) {
-                Toast.makeText(requireContext(), "Pokračujte DOPRAVA →", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "← Pokračujte DOPRAVA ", Toast.LENGTH_SHORT).show()
             } else if (!isRightPhase && position > lastPage) {
-                Toast.makeText(requireContext(), "← Pokračujte DOĽAVA", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), " Pokračujte DOĽAVA →", Toast.LENGTH_SHORT).show()
             }
 
             lastPage = position
@@ -149,11 +149,11 @@ class BehametricsTouchFragment : Fragment() {
         if (isRightPhase) {
             viewPager.setCurrentItem(0, false)
             lastPage = 0
-            directionText.text = "→  DOPRAVA"
+            directionText.text = "←"
         } else {
             viewPager.setCurrentItem(images.size - 1, false)
             lastPage = images.size - 1
-            directionText.text = "←  DOĽAVA"
+            directionText.text = "→"
         }
 
         statusText.text = "Prebieha záznam..."
@@ -196,11 +196,11 @@ class BehametricsTouchFragment : Fragment() {
 
         val isNextRight = nextRound <= rightRoundsCount
         if (isNextRight) {
-            directionText.text = "→  DOPRAVA"
-            startButton.text = "Spustiť kolo $nextRound  →"
+            directionText.text = "←"
+            startButton.text = "Spustiť kolo $nextRound"
         } else {
-            directionText.text = "←  DOĽAVA"
-            startButton.text = "←  Spustiť kolo $nextRound"
+            directionText.text = "→"
+            startButton.text = "Spustiť kolo $nextRound"
         }
     }
 
