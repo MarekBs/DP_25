@@ -21,7 +21,6 @@ class SensorFragment : Fragment() {
 
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
-    private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var uploadOverlay: View
@@ -40,7 +39,6 @@ class SensorFragment : Fragment() {
 
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
-        stopButton = view.findViewById(R.id.stop_button)
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
@@ -60,7 +58,6 @@ class SensorFragment : Fragment() {
         sensorViewModel.isLogging.observe(viewLifecycleOwner) { isLogging ->
             val attempt = sensorViewModel.currentAttempt.value ?: 0
             startButton.isEnabled = !isLogging && attempt < sensorViewModel.maxAttempts
-            stopButton.isEnabled = isLogging
         }
 
         sensorViewModel.isUploading.observe(viewLifecycleOwner) { uploading ->
@@ -69,10 +66,6 @@ class SensorFragment : Fragment() {
 
         startButton.setOnClickListener {
             startNextAttempt()
-        }
-
-        stopButton.setOnClickListener {
-            stopCurrentLogging()
         }
 
         backButton.setOnClickListener {

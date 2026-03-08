@@ -29,7 +29,6 @@ class BehametricsFragment : Fragment() {
 
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
-    private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var dropdown: AutoCompleteTextView
@@ -52,7 +51,6 @@ class BehametricsFragment : Fragment() {
 
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
-        stopButton = view.findViewById(R.id.stop_button)
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         dropdown = view.findViewById(R.id.dropdown)
@@ -76,7 +74,6 @@ class BehametricsFragment : Fragment() {
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
             val attempt = viewModel.currentAttempt.value ?: 0
             startButton.isEnabled = !logging && attempt < viewModel.maxAttempts
-            stopButton.isEnabled = logging
         }
 
         viewModel.selectedActivity.observe(viewLifecycleOwner) { activity ->
@@ -109,10 +106,6 @@ class BehametricsFragment : Fragment() {
                 return@setOnClickListener
             }
             startNextAttempt()
-        }
-
-        stopButton.setOnClickListener {
-            stopCurrentLogging()
         }
 
         backButton.setOnClickListener {

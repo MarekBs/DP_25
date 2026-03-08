@@ -137,7 +137,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_button"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="104dp"
                 android:text="Spustiť pokus"
                 android:textAllCaps="false"
                 android:textSize="15sp"
@@ -145,19 +145,6 @@
                 app:cornerRadius="12dp"
                 app:elevation="0dp"
                 android:layout_marginBottom="12dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/stop_button"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:text="Zastaviť"
-                android:textAllCaps="false"
-                android:textSize="15sp"
-                android:enabled="false"
-                app:backgroundTint="@color/danger"
-                app:cornerRadius="12dp"
-                app:elevation="0dp"
-                android:layout_marginBottom="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/back_button"

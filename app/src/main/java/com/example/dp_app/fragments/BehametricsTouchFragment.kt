@@ -25,7 +25,6 @@ class BehametricsTouchFragment : Fragment() {
 
     private lateinit var statusText: TextView
     private lateinit var startButton: Button
-    private lateinit var stopButton: Button
     private lateinit var backButton: Button
     private lateinit var counterText: TextView
     private lateinit var directionText: TextView
@@ -91,7 +90,6 @@ class BehametricsTouchFragment : Fragment() {
 
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
-        stopButton = view.findViewById(R.id.stop_button)
         backButton = view.findViewById(R.id.back_button)
         counterText = view.findViewById(R.id.counter_text)
         directionText = view.findViewById(R.id.direction_text)
@@ -116,11 +114,9 @@ class BehametricsTouchFragment : Fragment() {
         viewModel.isLogging.observe(viewLifecycleOwner) { logging ->
             val round = viewModel.currentAttempt.value ?: 0
             startButton.isEnabled = !logging && !roundActive && round < totalRounds
-            stopButton.isEnabled = logging
         }
 
         startButton.setOnClickListener { startNextRound() }
-        stopButton.setOnClickListener { finishRound() }
 
         backButton.setOnClickListener {
             findNavController().navigate(R.id.action_behametricsTouchFragment_to_introFragment)
@@ -187,7 +183,6 @@ class BehametricsTouchFragment : Fragment() {
 
     private fun finishAll() {
         startButton.isEnabled = false
-        stopButton.isEnabled = false
         UserSession.markCompleted(requireContext(), "touch")
         successOverlay.visibility = View.VISIBLE
         successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
