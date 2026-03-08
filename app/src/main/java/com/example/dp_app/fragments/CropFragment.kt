@@ -93,19 +93,21 @@ class CropFragment : Fragment() {
     }
 
     private fun setupPhotoView() {
+
         val drawable = resources.getDrawable(R.drawable.stvorec_zoom, null)
         val imageWidth = drawable.intrinsicWidth.toFloat()
         val imageHeight = drawable.intrinsicHeight.toFloat()
 
-        val frameSize = 280 * resources.displayMetrics.density
+        photoView.post {
+            val frameSize = minOf(photoView.width, photoView.height).toFloat()
+            val scaleX = frameSize / imageWidth
+            val scaleY = frameSize / imageHeight
+            maxScale = maxOf(scaleX, scaleY)
 
-        val scaleX = frameSize / imageWidth
-        val scaleY = frameSize / imageHeight
-        maxScale = maxOf(scaleX, scaleY)
-
-        photoView.minimumScale = 1f
-        photoView.maximumScale = maxScale
-        photoView.setScaleLevels(1f, maxScale / 2f, maxScale)
+            photoView.minimumScale = 1f
+            photoView.maximumScale = maxScale
+            photoView.setScaleLevels(1f, maxScale / 2f, maxScale)
+        }
 
         photoView.setOnScaleChangeListener { scaleFactor, focusX, focusY ->
             if (!isAmplifying) {
