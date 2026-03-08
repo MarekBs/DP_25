@@ -1,5 +1,6 @@
 package com.example.dp_app.fragments
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,11 +11,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dp_app.R
-import com.example.dp_app.models.BehametricsViewModel
 import com.example.dp_app.UserSession
+import com.example.dp_app.models.BehametricsViewModel
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.firebase.storage.FirebaseStorage
-import android.net.Uri
 import java.io.File
 
 class CropFragment : Fragment() {
@@ -30,10 +30,12 @@ class CropFragment : Fragment() {
     private lateinit var hintOverlay: View
     private lateinit var uploadOverlay: View
     private lateinit var successOverlay: View
+    private lateinit var cropBorderContainer: View
 
-    private var maxScale = 1f
     private var autoStopped = false
-    private var isAmplifying = false
+    private var isStopping = false
+    private var computedMinScale = 0.25f
+    private var computedMaxScale = 1f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,10 +49,6 @@ class CropFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         photoView = view.findViewById(R.id.photoView)
-        photoView.setImageResource(R.drawable.stvorec_zoom)
-
-        setupPhotoView()
-
         statusText = view.findViewById(R.id.status_text)
         startButton = view.findViewById(R.id.start_button)
         stopButton = view.findViewById(R.id.stop_button)
@@ -59,7 +57,9 @@ class CropFragment : Fragment() {
         hintOverlay = view.findViewById(R.id.hint_overlay)
         uploadOverlay = view.findViewById(R.id.upload_overlay)
         successOverlay = view.findViewById(R.id.success_overlay)
+        cropBorderContainer = view.findViewById(R.id.cropBorderContainer)
 
+        setupPhotoView()
         viewModel.init(requireContext())
 
         viewModel.status.observe(viewLifecycleOwner) {
@@ -93,39 +93,64 @@ class CropFragment : Fragment() {
     }
 
     private fun setupPhotoView() {
-
-        val drawable = resources.getDrawable(R.drawable.stvorec_zoom, null)
-        val imageWidth = drawable.intrinsicWidth.toFloat()
-        val imageHeight = drawable.intrinsicHeight.toFloat()
+        photoView.setImageResource(R.drawable.stvorec_zoom)
+        photoView.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
 
         photoView.post {
-            val frameSize = minOf(photoView.width, photoView.height).toFloat()
-            val scaleX = frameSize / imageWidth
-            val scaleY = frameSize / imageHeight
-            maxScale = maxOf(scaleX, scaleY)
+            val vw = photoView.width.toFloat()
+            val vh = photoView.height.toFloat()
+            if (vw == 0f || vh == 0f) return@post
 
-            photoView.minimumScale = 1f
-            photoView.maximumScale = maxScale
-            photoView.setScaleLevels(1f, maxScale / 2f, maxScale)
+            val drawable = photoView.drawable ?: return@post
+            val iw = drawable.intrinsicWidth.toFloat()
+            val ih = drawable.intrinsicHeight.toFloat()
+
+            // Border nastavíme ako štvorec = kratšia strana PhotoView
+            val borderSize = minOf(vw, vh).toInt()
+            val params = cropBorderContainer.layoutParams as android.widget.FrameLayout.LayoutParams
+            params.width = borderSize
+            params.height = borderSize
+            params.gravity = android.view.Gravity.CENTER
+            cropBorderContainer.layoutParams = params
+
+            // FIT_CENTER interne zobrazuje obraz pri tomto faktore
+            val fitFactor = minOf(vw / iw, vh / ih)
+
+            // maxScale = scale pri ktorom obraz presne vyplní štvorcový border
+            // pri PhotoView scale s: zobrazená veľkosť = s * fitFactor * min(iw,ih)
+            // chceme: s * fitFactor * min(iw,ih) = borderSize
+            computedMinScale = 0.25f
+            computedMaxScale = borderSize / (fitFactor * minOf(iw, ih))
+
+            applyScales()
         }
 
-        photoView.setOnScaleChangeListener { scaleFactor, focusX, focusY ->
-            if (!isAmplifying) {
-                isAmplifying = true
-                val amplified = 1f + (scaleFactor - 1f) * 1.2f
-                val newScale = (photoView.scale * amplified).coerceIn(1f, maxScale)
-                photoView.setScale(newScale, focusX, focusY, false)
-                isAmplifying = false
-            }
-            if (!autoStopped && viewModel.isLogging.value == true && photoView.scale >= maxScale * 0.98f) {
+        photoView.setOnScaleChangeListener { _, _, _ ->
+            val currentScale = photoView.scale
+            val max = photoView.maximumScale
+            if (!autoStopped && viewModel.isLogging.value == true && currentScale >= max * 0.98f) {
                 autoStopped = true
                 stopCurrentLogging()
             }
         }
     }
 
-    private fun resetZoom() {
-        photoView.setScale(1f, false)
+    private fun applyScales() {
+        val mid = (computedMinScale + computedMaxScale) / 2f
+        photoView.minimumScale = computedMinScale
+        photoView.mediumScale = mid
+        photoView.maximumScale = computedMaxScale
+        photoView.setScaleLevels(computedMinScale, mid, computedMaxScale)
+        photoView.setScale(computedMinScale, false)
+    }
+
+    // Synchronný reset – spustí sa pred startLogging(), žiadna race condition
+    private fun resetPhotoViewState() {
+        photoView.setZoomable(false)
+        photoView.setImageDrawable(null)
+        photoView.setImageResource(R.drawable.stvorec_zoom)
+        photoView.setZoomable(true)
+        applyScales()
     }
 
     private fun startNextAttempt() {
@@ -136,27 +161,41 @@ class CropFragment : Fragment() {
         }
 
         if (attempt == 0) {
-            hintOverlay.animate().alpha(0f).setDuration(300).withEndAction {
-                hintOverlay.visibility = View.GONE
-            }.start()
+            hintOverlay.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction {
+                    hintOverlay.visibility = View.GONE
+                }
+                .start()
         }
 
         autoStopped = false
-        isAmplifying = false
+        isStopping = false
+        resetPhotoViewState()
+
         viewModel.incrementAttempt()
         statusText.text = "Logovanie..."
         viewModel.startLogging(requireActivity())
     }
 
     private fun stopCurrentLogging() {
+        if (isStopping) return
+        isStopping = true
+
         viewModel.stopLogging(requireActivity())
-        resetZoom()
+        resetPhotoViewState()
+
         photoView.isEnabled = false
         uploadOverlay.visibility = View.VISIBLE
 
         uploadCurrentLog {
+            if (!isAdded) return@uploadCurrentLog
+
             uploadOverlay.visibility = View.GONE
             photoView.isEnabled = true
+            isStopping = false
+
             val attempt = viewModel.currentAttempt.value ?: 0
             if (attempt >= viewModel.maxAttempts) {
                 finishAllAttempts()
@@ -168,11 +207,14 @@ class CropFragment : Fragment() {
 
     private fun finishAllAttempts() {
         startButton.isEnabled = false
+        stopButton.isEnabled = false
         UserSession.markCompleted(requireContext(), "zoom")
         successOverlay.visibility = View.VISIBLE
-        successOverlay.findViewById<android.widget.Button>(R.id.success_menu_button).setOnClickListener {
-            findNavController().navigate(R.id.action_cropFragment_to_introFragment)
-        }
+
+        successOverlay.findViewById<com.google.android.material.button.MaterialButton>(R.id.success_menu_button)
+            .setOnClickListener {
+                findNavController().navigate(R.id.action_cropFragment_to_introFragment)
+            }
     }
 
     private fun uploadCurrentLog(onComplete: () -> Unit) {
@@ -185,7 +227,7 @@ class CropFragment : Fragment() {
         }
 
         val files = logDir.listFiles()
-            ?.filter { !it.name.contains("orientation", ignoreCase = true) }
+            ?.filter { it.isFile && !it.name.contains("orientation", ignoreCase = true) }
             ?: emptyList()
 
         if (files.isEmpty()) {
