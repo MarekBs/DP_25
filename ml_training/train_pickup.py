@@ -216,12 +216,20 @@ def train_and_evaluate(X, y, feature_names):
         print(f"  [UPOZORNENIE] Vyhodeni (malo vzoriek): {list(removed)}")
         X, y_enc = X[valid_mask], y_enc[valid_mask]
 
-    cv = StratifiedKFold(n_splits=max(2, min(5, int(np.min(np.bincount(y_enc))))),
-                         shuffle=True, random_state=42)
+    rng = np.random.default_rng(42)
+    train_idx, test_idx = [], []
+    for uid in np.unique(y_enc):
+        idx = np.where(y_enc == uid)[0]
+        rng.shuffle(idx)
+        n_test = max(1, int(round(len(idx) * 0.25)))
+        test_idx.extend(idx[:n_test])
+        train_idx.extend(idx[n_test:])
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y_enc, test_size=0.25, random_state=42, stratify=y_enc
-    )
+    X_trainval, y_trainval = X[train_idx], y_enc[train_idx]
+    X_test,     y_test     = X[test_idx],  y_enc[test_idx]
+
+    cv = StratifiedKFold(n_splits=max(2, min(5, int(np.min(np.bincount(y_trainval))))),
+                         shuffle=True, random_state=42)
 
     models = {
         "SVM": Pipeline([
@@ -244,8 +252,8 @@ def train_and_evaluate(X, y, feature_names):
 
     results = {}
     for name, model in models.items():
-        cv_scores = cross_val_score(model, X, y_enc, cv=cv, scoring="accuracy")
-        model.fit(X_train, y_train)
+        cv_scores = cross_val_score(model, X_trainval, y_trainval, cv=cv, scoring="accuracy")
+        model.fit(X_trainval, y_trainval)
         y_pred = model.predict(X_test)
         acc    = accuracy_score(y_test, y_pred)
         results[name] = {"model": model, "cv": cv_scores, "acc": acc,
