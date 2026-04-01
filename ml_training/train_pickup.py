@@ -235,19 +235,45 @@ def train_and_evaluate(X, y, feature_names):
     models = {
         "SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", SVC(kernel="rbf", C=10, gamma="scale", probability=True, random_state=42))
+            ("clf", SVC(
+                kernel="rbf",
+                C=1.0,
+                gamma="scale",
+                probability=True,
+                random_state=42
+            ))
         ]),
         "Random Forest": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42, n_jobs=-1))
+            ("clf", RandomForestClassifier(
+                n_estimators=100,
+                max_depth=None,
+                min_samples_split=2,
+                min_samples_leaf=1,
+                random_state=42,
+                n_jobs=-1
+            ))
         ]),
         "XGBoost": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", XGBClassifier(eval_metric="mlogloss", random_state=42, n_jobs=-1))
+            ("clf", XGBClassifier(
+                n_estimators=100,
+                max_depth=6,
+                learning_rate=0.3,
+                subsample=1.0,
+                eval_metric="mlogloss",
+                random_state=42,
+                n_jobs=-1
+            ))
         ]),
         "KNN": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", KNeighborsClassifier(n_neighbors=5, metric="euclidean"))
+            ("clf", KNeighborsClassifier(
+                n_neighbors=5,
+                weights="uniform",
+                metric="minkowski",
+                p=2
+            ))
         ]),
     }
 
