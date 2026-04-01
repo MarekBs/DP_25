@@ -6,8 +6,9 @@ from collections import defaultdict
 from scipy.stats import skew, kurtosis as sp_kurtosis
 from scipy.signal import find_peaks
 from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
@@ -240,9 +241,9 @@ def train_and_evaluate(X, y, feature_names):
             ("scaler", StandardScaler()),
             ("clf", RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42, n_jobs=-1))
         ]),
-        "Gradient Boosting": Pipeline([
+        "XGBoost": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", GradientBoostingClassifier(n_estimators=200, max_depth=3, learning_rate=0.1, random_state=42))
+            ("clf", XGBClassifier(eval_metric="mlogloss", random_state=42, n_jobs=-1))
         ]),
         "KNN": Pipeline([
             ("scaler", StandardScaler()),
