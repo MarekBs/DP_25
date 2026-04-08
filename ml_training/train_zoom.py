@@ -73,7 +73,7 @@ def parse_touch_file(filepath):
     df = pd.read_csv(filepath, header=None, names=TOUCH_COLS)
     for col in ["timestamp_ns", "pointer_id"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    for col in ["x", "y", "pressure", "size"]:
+    for col in ["x", "y", "pressure", "size", "touch_major", "touch_minor"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df.dropna(subset=["timestamp_ns", "pointer_id", "x", "y"], inplace=True)
     df["pointer_id"] = df["pointer_id"].astype(int)
