@@ -111,10 +111,13 @@ def axis_features(v, t, prefix):
     feats[f"{prefix}_min"]      = np.min(v)
     feats[f"{prefix}_max"]      = np.max(v)
     feats[f"{prefix}_mean"]     = np.mean(v)
+    feats[f"{prefix}_var"]      = np.var(v)
     feats[f"{prefix}_std"]      = np.std(v)
     feats[f"{prefix}_median"]   = np.median(v)
     feats[f"{prefix}_skewness"] = skew(v)
     feats[f"{prefix}_kurtosis"] = sp_kurtosis(v)
+    feats[f"{prefix}_q1"]       = np.percentile(v, 25)
+    feats[f"{prefix}_q3"]       = np.percentile(v, 75)
     feats[f"{prefix}_iqr"]      = np.percentile(v, 75) - np.percentile(v, 25)
 
     dt = np.diff(t).clip(min=1e-3)
@@ -124,11 +127,14 @@ def axis_features(v, t, prefix):
 
     peaks, _ = find_peaks(v)
     pv = v[peaks] if len(peaks) > 0 else np.array([0.0])
+    feats[f"{prefix}_peak_avg_distance"] = float(np.mean(np.diff(peaks))) if len(peaks) > 1 else 0.0
+    feats[f"{prefix}_peak_min"]  = float(np.min(pv))
     feats[f"{prefix}_peak_max"]  = float(np.max(pv))
     feats[f"{prefix}_peak_mean"] = float(np.mean(pv))
 
     fft = np.abs(np.fft.rfft(v))
-    feats[f"{prefix}_energy"] = float(np.sum(fft**2))
+    feats[f"{prefix}_fft_sum"] = float(np.sum(fft))
+    feats[f"{prefix}_energy"]  = float(np.sum(fft**2))
 
     return feats
 
@@ -158,12 +164,6 @@ def extract_features(df, direction_label, screen_w=1080.0, screen_h=2340.0):
     feats["start_y"]      = y[0]
     feats["end_x"]        = x[-1]
     feats["end_y"]        = y[-1]
-
-    pressure = df["pressure"].values
-    feats["pressure_mean"] = float(np.mean(pressure))
-    feats["pressure_std"]  = float(np.std(pressure))
-    feats["pressure_max"]  = float(np.max(pressure))
-    feats["pressure_min"]  = float(np.min(pressure))
 
     size = df["size"].replace(0, np.nan).fillna(df["size"].mean()).values
     feats["size_mean"] = float(np.mean(size))

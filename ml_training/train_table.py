@@ -83,6 +83,7 @@ def axis_features(v, prefix):
     feats[f"{prefix}_min"]      = np.min(v)
     feats[f"{prefix}_max"]      = np.max(v)
     feats[f"{prefix}_mean"]     = np.mean(v)
+    feats[f"{prefix}_var"]      = np.var(v)
     feats[f"{prefix}_std"]      = np.std(v)
     feats[f"{prefix}_median"]   = np.median(v)
     feats[f"{prefix}_skewness"] = skew(v)
@@ -90,22 +91,18 @@ def axis_features(v, prefix):
     feats[f"{prefix}_q1"]       = np.percentile(v, 25)
     feats[f"{prefix}_q3"]       = np.percentile(v, 75)
     feats[f"{prefix}_iqr"]      = np.percentile(v, 75) - np.percentile(v, 25)
-    feats[f"{prefix}_velocity"]  = np.trapezoid(np.abs(v))
+    feats[f"{prefix}_velocity"]   = np.trapezoid(np.abs(v))
     feats[f"{prefix}_rms"]       = np.sqrt(np.mean(v**2))
     feats[f"{prefix}_zero_crossing"] = int(np.sum(np.diff(np.sign(v - np.mean(v))) != 0))
     peaks, _ = find_peaks(v)
     peak_vals = v[peaks] if len(peaks) > 0 else np.array([0.0])
-    feats[f"{prefix}_peak_avg_distance"] = float(np.mean(np.diff(peaks))) if len(peaks) > 1 else 0.0
+    feats[f"{prefix}_n_peaks"]   = len(peaks)
     feats[f"{prefix}_peak_min"]  = float(np.min(peak_vals))
     feats[f"{prefix}_peak_max"]  = float(np.max(peak_vals))
     feats[f"{prefix}_peak_mean"] = float(np.mean(peak_vals))
-    feats[f"{prefix}_waveform_length"] = float(np.sum(np.abs(np.diff(v))))
-    feats[f"{prefix}_autocorr_lag1"]   = float(np.corrcoef(v[:-1], v[1:])[0, 1]) if len(v) > 2 else 0.0
     fft = np.abs(np.fft.rfft(v))
-    feats[f"{prefix}_energy"]          = float(np.sum(fft**2))
-    feats[f"{prefix}_dominant_freq"]   = float(np.argmax(fft))
-    p = fft / (np.sum(fft) + 1e-12)
-    feats[f"{prefix}_spectral_entropy"] = float(-np.sum(p * np.log(p + 1e-12)))
+    feats[f"{prefix}_fft_sum"] = float(np.sum(fft))
+    feats[f"{prefix}_energy"]  = float(np.sum(fft**2))
     return feats
 
 

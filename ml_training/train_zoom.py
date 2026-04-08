@@ -148,10 +148,15 @@ def extract_features(times_ms, distances, seg_df=None):
     feats["dist_final"]     = d[-1]
     feats["dist_delta"]     = d[-1] - d[0]
     feats["zoom_factor"]    = d[-1] / d[0] if d[0] > 0 else 1.0
+    feats["dist_min"]       = np.min(d)
+    feats["dist_max"]       = np.max(d)
     feats["dist_mean"]      = np.mean(d)
+    feats["dist_var"]       = np.var(d)
     feats["dist_std"]       = np.std(d)
     feats["dist_range"]     = np.max(d) - np.min(d)
     feats["dist_median"]    = np.median(d)
+    feats["dist_q1"]        = np.percentile(d, 25)
+    feats["dist_q3"]        = np.percentile(d, 75)
     feats["dist_iqr"]       = np.percentile(d, 75) - np.percentile(d, 25)
     feats["dist_skew"]      = float(skew(d))        if len(d) > 2 else 0.0
     feats["dist_kurt"]      = float(sp_kurtosis(d)) if len(d) > 3 else 0.0
@@ -217,8 +222,11 @@ def extract_features(times_ms, distances, seg_df=None):
             feats["p0_path_length"] = path_length(p0["x"], p0["y"])
             feats["p1_path_length"] = path_length(p1["x"], p1["y"])
             feats["path_asymmetry"] = abs(feats["p0_path_length"] - feats["p1_path_length"])
-            feats["p0_disp"] = np.sqrt((p0["x"].iloc[-1]-p0["x"].iloc[0])**2 + (p0["y"].iloc[-1]-p0["y"].iloc[0])**2)
-            feats["p1_disp"] = np.sqrt((p1["x"].iloc[-1]-p1["x"].iloc[0])**2 + (p1["y"].iloc[-1]-p1["y"].iloc[0])**2)
+
+            feats["p0_disp"] = np.sqrt((p0["x"].iloc[-1] - p0["x"].iloc[0])**2 +
+                                       (p0["y"].iloc[-1] - p0["y"].iloc[0])**2)
+            feats["p1_disp"] = np.sqrt((p1["x"].iloc[-1] - p1["x"].iloc[0])**2 +
+                                       (p1["y"].iloc[-1] - p1["y"].iloc[0])**2)
 
             dur0 = p0["time_ms"].iloc[-1] - p0["time_ms"].iloc[0] + 1e-3
             dur1 = p1["time_ms"].iloc[-1] - p1["time_ms"].iloc[0] + 1e-3
@@ -228,11 +236,20 @@ def extract_features(times_ms, distances, seg_df=None):
 
             all_x = pd.concat([p0["x"], p1["x"]])
             all_y = pd.concat([p0["y"], p1["y"]])
-            feats["bbox_width"]    = all_x.max() - all_x.min()
-            feats["bbox_height"]   = all_y.max() - all_y.min()
+            feats["bbox_width"]  = all_x.max() - all_x.min()
+            feats["bbox_height"] = all_y.max() - all_y.min()
+
             feats["bbox_aspect"]   = feats["bbox_width"] / (feats["bbox_height"] + 1e-3)
-            feats["pressure_mean"] = moves["pressure"].mean()
-            feats["pressure_std"]  = moves["pressure"].std() if len(moves) > 1 else 0.0
+
+            size = moves["size"].replace(0, np.nan).fillna(moves["size"].mean())
+            feats["size_mean"] = float(size.mean())
+            feats["size_std"]  = float(size.std()) if len(size) > 1 else 0.0
+
+            major = moves["touch_major"].replace(0, np.nan).fillna(moves["touch_major"].mean())
+            minor = moves["touch_minor"].replace(0, np.nan).fillna(moves["touch_minor"].mean())
+            feats["touch_major_mean"] = float(major.mean())
+            feats["touch_minor_mean"] = float(minor.mean())
+            feats["aspect_ratio"]     = float(major.mean() / minor.mean()) if minor.mean() > 0 else 1.0
         else:
             for k in ["centroid_x_start", "centroid_y_start", "centroid_x_end", "centroid_y_end",
                       "centroid_dx", "centroid_dy", "centroid_disp",
@@ -240,7 +257,8 @@ def extract_features(times_ms, distances, seg_df=None):
                       "p0_path_length", "p1_path_length", "path_asymmetry",
                       "p0_disp", "p1_disp", "p0_vel", "p1_vel", "vel_asymmetry",
                       "bbox_width", "bbox_height", "bbox_aspect",
-                      "pressure_mean", "pressure_std"]:
+                      "size_mean", "size_std", "touch_major_mean", "touch_minor_mean",
+                      "aspect_ratio"]:
                 feats[k] = 0.0
 
     return feats
