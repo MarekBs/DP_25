@@ -91,7 +91,7 @@ class SensorFragment : Fragment() {
         sensorViewModel.startLogging()
 
         autoStopRunnable = Runnable { stopCurrentLogging() }
-        handler.postDelayed(autoStopRunnable!!, 16000)
+        handler.postDelayed(autoStopRunnable!!, 60000)
     }
 
     private fun stopCurrentLogging() {

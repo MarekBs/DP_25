@@ -39,7 +39,7 @@ class SensorViewModel : ViewModel(), SensorEventListener {
     private val _currentAttempt = MutableLiveData(0)
     val currentAttempt: LiveData<Int> get() = _currentAttempt
 
-    val maxAttempts = 15
+    val maxAttempts = 1
 
     private var lastLogTime = 0L
     private val samplingInterval = 20L
