@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 import joblib
@@ -21,7 +22,7 @@ WINDOW_STEP = 128   # krok (50% overlap)
 
 USE_FEATURE_SELECTION = False
 TOP_N_FEATURES        = 40
-
+N_FOLDS               = 5
 
 def axis_features(v, prefix):
     feats = {}
@@ -50,7 +51,6 @@ def axis_features(v, prefix):
     feats[f"{prefix}_energy"]  = float(np.sum(fft**2))
     return feats
 
-
 def extract_sensor_features(df_xyz, prefix):
     feats = {}
     for axis in ["x", "y", "z"]:
@@ -63,7 +63,6 @@ def extract_sensor_features(df_xyz, prefix):
     feats[f"{prefix}_cor_yz"]        = float(np.corrcoef(y, z)[0, 1])
     return feats
 
-
 def cross_sensor_features(acc_df, gyr_df):
     feats = {}
     for axis in ["x", "y", "z"]:
@@ -72,7 +71,6 @@ def cross_sensor_features(acc_df, gyr_df):
         n = min(len(a), len(g))
         feats[f"accel_gyro_cor_{axis}"] = float(np.corrcoef(a[:n], g[:n])[0, 1]) if n > 2 else 0.0
     return feats
-
 
 def extract_window_features(window_df):
     acc_df = window_df[["userAcceleration.x", "userAcceleration.y", "userAcceleration.z"]]
@@ -88,13 +86,12 @@ def extract_window_features(window_df):
         feats[f"grav_{axis}_mean"] = window_df[f"gravity.{axis}"].mean()
     return feats
 
-
-def load_dataset(local_dir, window_size=WINDOW_SIZE, window_step=WINDOW_STEP, test_ratio=0.25):
+def load_dataset(local_dir, window_size=WINDOW_SIZE, window_step=WINDOW_STEP):
     data_path = Path(local_dir)
     csv_files = sorted(data_path.glob("sub_*.csv"))
     print(f"\nNajdených {len(csv_files)} subjektov")
 
-    all_features, all_labels, all_splits = [], [], []
+    all_features, all_labels = [], []
 
     for csv_file in csv_files:
         subject_id = csv_file.stem
@@ -103,31 +100,24 @@ def load_dataset(local_dir, window_size=WINDOW_SIZE, window_step=WINDOW_STEP, te
             df = df.drop(columns=[c for c in df.columns if c.startswith("Unnamed") or c.startswith("index")], errors="ignore")
             df = df.apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True)
 
-            split_row = int(len(df) * (1 - test_ratio))
-            n_train = n_test = 0
+            n_windows = 0
             for start in range(0, len(df) - window_size + 1, window_step):
                 window = df.iloc[start : start + window_size]
                 feats  = extract_window_features(window)
                 all_features.append(feats)
                 all_labels.append(subject_id)
-                if start + window_size <= split_row:
-                    all_splits.append("train")
-                    n_train += 1
-                else:
-                    all_splits.append("test")
-                    n_test += 1
+                n_windows += 1
 
-            print(f"  {subject_id}: {len(df)} vzoriek → {n_train} train okien, {n_test} test okien")
+            print(f"  {subject_id}: {len(df)} vzoriek → {n_windows} okien")
 
         except Exception as e:
             print(f"  [CHYBA] {subject_id}: {e}")
 
     df_feats = pd.DataFrame(all_features).fillna(0)
     print(f"\nDataset: {len(df_feats)} vzoriek x {len(df_feats.columns)} príznakov")
-    return df_feats.values.astype(np.float64), np.array(all_labels), np.array(all_splits), df_feats.columns.tolist()
+    return df_feats.values.astype(np.float64), np.array(all_labels), df_feats.columns.tolist()
 
-
-def make_models(n_neighbors=5):
+def make_models():
     return {
         "SVM": Pipeline([
             ("scaler", StandardScaler()),
@@ -144,10 +134,9 @@ def make_models(n_neighbors=5):
         ]),
         "KNN": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", KNeighborsClassifier(n_neighbors=n_neighbors))
+            ("clf", KNeighborsClassifier(n_neighbors=5))
         ]),
     }
-
 
 def select_features(X, y, feature_names):
     rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
@@ -156,50 +145,55 @@ def select_features(X, y, feature_names):
     print(f"Feature selection: top {TOP_N_FEATURES} z {X.shape[1]} príznakov")
     return X[:, top_idx], [feature_names[i] for i in top_idx]
 
-
-def train_and_evaluate(X, y, splits, feature_names):
+def train_and_evaluate(X, y, feature_names):
     if USE_FEATURE_SELECTION:
         X, feature_names = select_features(X, y, feature_names)
 
     users       = np.unique(y)
     model_names = list(make_models().keys())
     results     = {name: {"fars": [], "frrs": [], "eers": [], "aucs": [], "accs": [],
-                          "precs": [], "recs": [], "f1s": [], "hits": [], "misses": []}
+                          "precs": [], "recs": [], "f1s": [], "hits": [], "misses": [],
+                          "cv_aucs": []}
                    for name in model_names}
     best_models = {name: {} for name in model_names}
-
-    train_mask = splits == "train"
-    test_mask  = splits == "test"
 
     for target_user in users:
         y_bin = (y == target_user).astype(int)
 
-        X_train, y_train = X[train_mask], y_bin[train_mask]
-        X_test,  y_test  = X[test_mask],  y_bin[test_mask]
+        rng     = np.random.default_rng(42)
+        pos_idx = np.where(y_bin == 1)[0]
+        neg_idx = np.where(y_bin == 0)[0]
+        rng.shuffle(pos_idx)
+        rng.shuffle(neg_idx)
 
-        # vyváženie: rovnaký počet neg ako pos v train aj test
-        rng = np.random.default_rng(42)
-        for split_name in ["train", "test"]:
-            X_s = X_train if split_name == "train" else X_test
-            y_s = y_train if split_name == "train" else y_test
-            pos = np.where(y_s == 1)[0]
-            neg = np.where(y_s == 0)[0]
-            if len(pos) == 0:
-                continue
-            rng.shuffle(neg)
-            idx = np.concatenate([pos, neg[:len(pos)]])
-            if split_name == "train":
-                X_train, y_train = X_s[idx], y_s[idx]
-            else:
-                X_test, y_test = X_s[idx], y_s[idx]
+        neg_idx = neg_idx[:len(pos_idx)]
 
-        if len(np.unique(y_train)) < 2 or len(np.unique(y_test)) < 2:
-            print(f"  [SKIP] {target_user}: chýba pozitívna trieda v train alebo test")
+        if len(pos_idx) < 5:
+            print(f"  [SKIP] {target_user}: málo vzoriek")
             continue
 
-        n_neighbors = min(5, len(y_train) - 1)
-        for name, model in make_models(n_neighbors).items():
-            model.fit(X_train, y_train)
+        n_pos_test = max(1, int(round(len(pos_idx) * 0.30)))
+        n_neg_test = max(1, int(round(len(neg_idx) * 0.30)))
+
+        test_idx     = np.concatenate([pos_idx[:n_pos_test], neg_idx[:n_neg_test]])
+        trainval_idx = np.concatenate([pos_idx[n_pos_test:], neg_idx[n_neg_test:]])
+
+        X_trainval, y_trainval = X[trainval_idx], y_bin[trainval_idx]
+        X_test,     y_test     = X[test_idx],     y_bin[test_idx]
+
+        if len(np.unique(y_trainval)) < 2:
+            continue
+
+        n_splits = min(N_FOLDS, int(np.min(np.bincount(y_trainval))))
+        if n_splits < 2:
+            continue
+        cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+
+        for name, model in make_models().items():
+            cv_auc = cross_val_score(model, X_trainval, y_trainval,
+                                     cv=cv, scoring="roc_auc").mean()
+
+            model.fit(X_trainval, y_trainval)
             y_pred  = model.predict(X_test)
             y_proba = model.predict_proba(X_test)[:, 1]
 
@@ -219,6 +213,7 @@ def train_and_evaluate(X, y, splits, feature_names):
             else:
                 eer = auc = 0.0
 
+            results[name]["cv_aucs"].append(cv_auc)
             results[name]["fars"].append(FAR)
             results[name]["frrs"].append(FRR)
             results[name]["eers"].append(eer)
@@ -231,7 +226,7 @@ def train_and_evaluate(X, y, splits, feature_names):
             results[name]["misses"].append(int((y_pred != y_test).sum()))
             best_models[name][target_user] = model
 
-    hdr = f"\n{'Model':<20} {'Acc':>6} {'FAR':>6} {'FRR':>6} {'EER':>6} {'Prec':>6} {'Rec':>6} {'F1':>6} {'AUC':>6} {'Hits':>8} {'Miss':>8}"
+    hdr = f"\n{'Model':<20} {'Acc':>6} {'FAR':>6} {'FRR':>6} {'EER':>6} {'Prec':>6} {'Rec':>6} {'F1':>6} {'AUC':>6} {'CV-AUC':>8} {'Hits':>8} {'Miss':>8}"
     print(hdr)
     print("-" * len(hdr))
     for name in model_names:
@@ -241,13 +236,14 @@ def train_and_evaluate(X, y, splits, feature_names):
         print(f"{name:<20} {np.mean(r['accs']):>6.3f} {np.mean(r['fars']):>6.3f} "
               f"{np.mean(r['frrs']):>6.3f} {np.mean(r['eers']):>6.3f} {np.mean(r['precs']):>6.3f} "
               f"{np.mean(r['recs']):>6.3f} {np.mean(r['f1s']):>6.3f} {np.mean(r['aucs']):>6.3f} "
-              f"{sum(r['hits']):>8} {sum(r['misses']):>8}")
+              f"{np.mean(r['cv_aucs']):>8.3f} {sum(r['hits']):>8} {sum(r['misses']):>8}")
 
+    # Grafy
     fig, axes = plt.subplots(1, len(model_names), figsize=(24, 5))
+    if len(model_names) == 1: axes = [axes]
     for ax, name in zip(axes, model_names):
         r = results[name]
-        if not r["eers"]:
-            continue
+        if not r["eers"]: continue
         ax.bar(range(len(r["eers"])), r["eers"], color="steelblue")
         ax.axhline(np.mean(r["eers"]), color="red", linestyle="--",
                    label=f'Avg EER={np.mean(r["eers"]):.3f}')
@@ -265,9 +261,7 @@ def train_and_evaluate(X, y, splits, feature_names):
         "feature_names": feature_names,
         "model_type": best_name,
     }, "walk_model.pkl")
-    print(f"\nNajlepší model: {best_name} "
-          f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> walk_model.pkl")
-
+    print(f"\nNajlepší model: {best_name} (avg acc={np.mean(results[best_name]['accs']):.4f}) -> walk_model.pkl")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -276,9 +270,8 @@ def main():
     parser.add_argument("--window-step", type=int, default=WINDOW_STEP)
     args = parser.parse_args()
 
-    X, y, splits, feature_names = load_dataset(args.data_dir, args.window_size, args.window_step)
-    train_and_evaluate(X, y, splits, feature_names)
-
+    X, y, feature_names = load_dataset(args.data_dir, args.window_size, args.window_step)
+    train_and_evaluate(X, y, feature_names)
 
 if __name__ == "__main__":
     main()
