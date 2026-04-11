@@ -8,18 +8,19 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
 from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
-import seaborn as sns
 import joblib
 
 LOCAL_DATA_DIR = "./data_walk"
 
 WINDOW_SIZE = 256   # vzorky na okno
 WINDOW_STEP = 128   # krok (50% overlap)
+
+USE_FEATURE_SELECTION = False
+TOP_N_FEATURES        = 40
 
 
 def axis_features(v, prefix):
@@ -126,138 +127,146 @@ def load_dataset(local_dir, window_size=WINDOW_SIZE, window_step=WINDOW_STEP, te
     return df_feats.values.astype(np.float64), np.array(all_labels), np.array(all_splits), df_feats.columns.tolist()
 
 
-def biometric_report(name, model, X_test, y_test, le):
-    y_pred  = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)
-    fars, frrs, eers, aucs = [], [], [], []
-    for i in range(len(le.classes_)):
-        y_bin      = (y_test == i).astype(int)
-        y_pred_bin = (y_pred  == i).astype(int)
-        if y_bin.sum() == 0:
-            continue
-        TP = int(((y_pred_bin == 1) & (y_bin == 1)).sum())
-        FP = int(((y_pred_bin == 1) & (y_bin == 0)).sum())
-        TN = int(((y_pred_bin == 0) & (y_bin == 0)).sum())
-        FN = int(((y_pred_bin == 0) & (y_bin == 1)).sum())
-        fars.append(FP / (FP + TN) if (FP + TN) > 0 else 0.0)
-        frrs.append(FN / (FN + TP) if (FN + TP) > 0 else 0.0)
-        if len(np.unique(y_bin)) > 1:
-            fpr_c, tpr_c, _ = roc_curve(y_bin, y_proba[:, i])
-            fnr_c = 1 - tpr_c
-            eers.append(float((fpr_c + fnr_c)[np.argmin(np.abs(fpr_c - fnr_c))]) / 2)
-            aucs.append(roc_auc_score(y_bin, y_proba[:, i]))
-
-    acc  = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred, average="macro", zero_division=0)
-    rec  = recall_score(y_test, y_pred, average="macro", zero_division=0)
-    f1   = f1_score(y_test, y_pred, average="macro", zero_division=0)
-    total_hits = int(np.sum(y_pred == y_test))
-    total_miss = int(np.sum(y_pred != y_test))
-    print(f"{name:<20} {acc:>6.3f} {np.mean(fars):>6.3f} {np.mean(frrs):>6.3f} {np.mean(eers):>6.3f} "
-          f"{prec:>6.3f} {rec:>6.3f} {f1:>6.3f} {np.mean(aucs):>6.3f} {total_hits:>8} {total_miss:>8}")
-
-
-def train_and_evaluate(X, y, splits, feature_names):
-    le           = LabelEncoder()
-    y_enc        = le.fit_transform(y)
-    labels_clean = np.array([re.sub(r'[^\x00-\x7F]+', '', c) for c in le.classes_])
-
-    counts = np.bincount(y_enc)
-    valid_mask = np.isin(y_enc, np.where(counts >= 2)[0])
-    if not valid_mask.all():
-        removed = le.classes_[counts < 2]
-        print(f"  [UPOZORNENIE] Vyhodení (málo vzoriek): {list(removed)}")
-        X, y_enc, splits = X[valid_mask], y_enc[valid_mask], splits[valid_mask]
-
-    train_mask = splits == "train"
-    test_mask  = splits == "test"
-    X_trainval, y_trainval = X[train_mask], y_enc[train_mask]
-    X_test,     y_test     = X[test_mask],  y_enc[test_mask]
-
-    cv = StratifiedKFold(n_splits=max(2, min(5, int(np.min(np.bincount(y_trainval))))),
-                         shuffle=True, random_state=42)
-
-    models = {
+def make_models(n_neighbors=5):
+    return {
         "SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", SVC(
-                kernel="rbf",
-                C=1.0,
-                gamma="scale",
-                probability=True,
-                random_state=42
-            ))
+            ("clf", SVC(kernel="rbf", C=1.0, gamma="scale", probability=True, random_state=42))
         ]),
         "Random Forest": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", RandomForestClassifier(
-                n_estimators=100,
-                max_depth=None,
-                min_samples_split=2,
-                min_samples_leaf=1,
-                random_state=42,
-                n_jobs=-1
-            ))
+            ("clf", RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1))
         ]),
         "XGBoost": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", XGBClassifier(
-                n_estimators=100,
-                max_depth=6,
-                learning_rate=0.3,
-                subsample=1.0,
-                eval_metric="mlogloss",
-                random_state=42,
-                n_jobs=-1
-            ))
+            ("clf", XGBClassifier(n_estimators=100, max_depth=6, learning_rate=0.3,
+                                   eval_metric="logloss", random_state=42, n_jobs=-1))
         ]),
         "KNN": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", KNeighborsClassifier(
-                n_neighbors=5,
-                weights="uniform",
-                metric="minkowski",
-                p=2
-            ))
+            ("clf", KNeighborsClassifier(n_neighbors=n_neighbors))
         ]),
     }
 
-    results = {}
-    for name, model in models.items():
-        cv_scores = cross_val_score(model, X_trainval, y_trainval, cv=cv, scoring="accuracy")
-        model.fit(X_trainval, y_trainval)
-        y_pred = model.predict(X_test)
-        acc    = accuracy_score(y_test, y_pred)
-        results[name] = {"model": model, "cv": cv_scores, "acc": acc,
-                         "y_test": y_test, "y_pred": y_pred}
 
-    print(f"\n{'Model':<20} {'CV acc':>10} {'Test acc':>10}")
-    print("-" * 42)
-    for name, res in results.items():
-        print(f"{name:<20} {res['cv'].mean():.4f}+-{res['cv'].std():.3f}  {res['acc']:.4f}")
+def select_features(X, y, feature_names):
+    rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    rf.fit(X, y)
+    top_idx = np.argsort(rf.feature_importances_)[::-1][:TOP_N_FEATURES]
+    print(f"Feature selection: top {TOP_N_FEATURES} z {X.shape[1]} príznakov")
+    return X[:, top_idx], [feature_names[i] for i in top_idx]
 
-    fig, axes = plt.subplots(1, 4, figsize=(28, 6))
-    for ax, (name, res) in zip(axes, results.items()):
-        sns.heatmap(confusion_matrix(res["y_test"], res["y_pred"]),
-                    annot=True, fmt="d", ax=ax, cmap="Blues",
-                    xticklabels=labels_clean, yticklabels=labels_clean)
-        ax.set_title(f"{name}  (acc={res['acc']:.3f})")
-        ax.set_xlabel("Predikované"); ax.set_ylabel("Skutočné")
-        ax.tick_params(axis="x", rotation=45)
-    plt.tight_layout()
-    plt.savefig("confusion_matrices_walk.png", dpi=150, bbox_inches="tight")
-    plt.close()
+
+def train_and_evaluate(X, y, splits, feature_names):
+    if USE_FEATURE_SELECTION:
+        X, feature_names = select_features(X, y, feature_names)
+
+    users       = np.unique(y)
+    model_names = list(make_models().keys())
+    results     = {name: {"fars": [], "frrs": [], "eers": [], "aucs": [], "accs": [],
+                          "precs": [], "recs": [], "f1s": [], "hits": [], "misses": []}
+                   for name in model_names}
+    best_models = {name: {} for name in model_names}
+
+    train_mask = splits == "train"
+    test_mask  = splits == "test"
+
+    for target_user in users:
+        y_bin = (y == target_user).astype(int)
+
+        X_train, y_train = X[train_mask], y_bin[train_mask]
+        X_test,  y_test  = X[test_mask],  y_bin[test_mask]
+
+        # vyváženie: rovnaký počet neg ako pos v train aj test
+        rng = np.random.default_rng(42)
+        for split_name in ["train", "test"]:
+            X_s = X_train if split_name == "train" else X_test
+            y_s = y_train if split_name == "train" else y_test
+            pos = np.where(y_s == 1)[0]
+            neg = np.where(y_s == 0)[0]
+            if len(pos) == 0:
+                continue
+            rng.shuffle(neg)
+            idx = np.concatenate([pos, neg[:len(pos)]])
+            if split_name == "train":
+                X_train, y_train = X_s[idx], y_s[idx]
+            else:
+                X_test, y_test = X_s[idx], y_s[idx]
+
+        if len(np.unique(y_train)) < 2 or len(np.unique(y_test)) < 2:
+            print(f"  [SKIP] {target_user}: chýba pozitívna trieda v train alebo test")
+            continue
+
+        n_neighbors = min(5, len(y_train) - 1)
+        for name, model in make_models(n_neighbors).items():
+            model.fit(X_train, y_train)
+            y_pred  = model.predict(X_test)
+            y_proba = model.predict_proba(X_test)[:, 1]
+
+            TP = int(((y_pred == 1) & (y_test == 1)).sum())
+            FP = int(((y_pred == 1) & (y_test == 0)).sum())
+            TN = int(((y_pred == 0) & (y_test == 0)).sum())
+            FN = int(((y_pred == 0) & (y_test == 1)).sum())
+
+            FAR = FP / (FP + TN) if (FP + TN) > 0 else 0.0
+            FRR = FN / (FN + TP) if (FN + TP) > 0 else 0.0
+
+            if len(np.unique(y_test)) > 1:
+                fpr_c, tpr_c, _ = roc_curve(y_test, y_proba)
+                fnr_c = 1 - tpr_c
+                eer = float((fpr_c + fnr_c)[np.argmin(np.abs(fpr_c - fnr_c))]) / 2
+                auc = roc_auc_score(y_test, y_proba)
+            else:
+                eer = auc = 0.0
+
+            results[name]["fars"].append(FAR)
+            results[name]["frrs"].append(FRR)
+            results[name]["eers"].append(eer)
+            results[name]["aucs"].append(auc)
+            results[name]["accs"].append(accuracy_score(y_test, y_pred))
+            results[name]["precs"].append(precision_score(y_test, y_pred, zero_division=0))
+            results[name]["recs"].append(recall_score(y_test, y_pred, zero_division=0))
+            results[name]["f1s"].append(f1_score(y_test, y_pred, zero_division=0))
+            results[name]["hits"].append(int((y_pred == y_test).sum()))
+            results[name]["misses"].append(int((y_pred != y_test).sum()))
+            best_models[name][target_user] = model
 
     hdr = f"\n{'Model':<20} {'Acc':>6} {'FAR':>6} {'FRR':>6} {'EER':>6} {'Prec':>6} {'Rec':>6} {'F1':>6} {'AUC':>6} {'Hits':>8} {'Miss':>8}"
     print(hdr)
     print("-" * len(hdr))
-    for name, res in results.items():
-        biometric_report(name, res["model"], X_test, res["y_test"], le)
+    for name in model_names:
+        r = results[name]
+        if not r["accs"]:
+            continue
+        print(f"{name:<20} {np.mean(r['accs']):>6.3f} {np.mean(r['fars']):>6.3f} "
+              f"{np.mean(r['frrs']):>6.3f} {np.mean(r['eers']):>6.3f} {np.mean(r['precs']):>6.3f} "
+              f"{np.mean(r['recs']):>6.3f} {np.mean(r['f1s']):>6.3f} {np.mean(r['aucs']):>6.3f} "
+              f"{sum(r['hits']):>8} {sum(r['misses']):>8}")
 
-    best = max(results, key=lambda k: results[k]["acc"])
-    joblib.dump({"model": results[best]["model"], "label_encoder": le,
-                 "feature_names": feature_names}, "walk_model.pkl")
-    print(f"\nNajlepší model ({best}, acc={results[best]['acc']:.4f}) -> walk_model.pkl")
+    fig, axes = plt.subplots(1, len(model_names), figsize=(24, 5))
+    for ax, name in zip(axes, model_names):
+        r = results[name]
+        if not r["eers"]:
+            continue
+        ax.bar(range(len(r["eers"])), r["eers"], color="steelblue")
+        ax.axhline(np.mean(r["eers"]), color="red", linestyle="--",
+                   label=f'Avg EER={np.mean(r["eers"]):.3f}')
+        ax.set_title(f"{name}\nFAR={np.mean(r['fars']):.3f}  FRR={np.mean(r['frrs']):.3f}")
+        ax.set_xlabel("Používateľ (index)")
+        ax.set_ylabel("EER")
+        ax.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig("binary_results_walk.png", dpi=150, bbox_inches="tight")
+    plt.close()
+
+    best_name = max(model_names, key=lambda k: np.mean(results[k]["accs"]) if results[k]["accs"] else 0)
+    joblib.dump({
+        "models": best_models[best_name],
+        "feature_names": feature_names,
+        "model_type": best_name,
+    }, "walk_model.pkl")
+    print(f"\nNajlepší model: {best_name} "
+          f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> walk_model.pkl")
 
 
 def main():
