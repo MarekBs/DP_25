@@ -12,7 +12,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
-import matplotlib.pyplot as plt
 import joblib
 
 LOCAL_DATA_DIR = "./data_walk"
@@ -237,23 +236,6 @@ def train_and_evaluate(X, y, feature_names):
               f"{np.mean(r['frrs']):>6.3f} {np.mean(r['eers']):>6.3f} {np.mean(r['precs']):>6.3f} "
               f"{np.mean(r['recs']):>6.3f} {np.mean(r['f1s']):>6.3f} {np.mean(r['aucs']):>6.3f} "
               f"{np.mean(r['cv_aucs']):>8.3f} {sum(r['hits']):>8} {sum(r['misses']):>8}")
-
-    # Grafy
-    fig, axes = plt.subplots(1, len(model_names), figsize=(24, 5))
-    if len(model_names) == 1: axes = [axes]
-    for ax, name in zip(axes, model_names):
-        r = results[name]
-        if not r["eers"]: continue
-        ax.bar(range(len(r["eers"])), r["eers"], color="steelblue")
-        ax.axhline(np.mean(r["eers"]), color="red", linestyle="--",
-                   label=f'Avg EER={np.mean(r["eers"]):.3f}')
-        ax.set_title(f"{name}\nFAR={np.mean(r['fars']):.3f}  FRR={np.mean(r['frrs']):.3f}")
-        ax.set_xlabel("Používateľ (index)")
-        ax.set_ylabel("EER")
-        ax.legend(fontsize=8)
-    plt.tight_layout()
-    plt.savefig("binary_results_walk.png", dpi=150, bbox_inches="tight")
-    plt.close()
 
     best_name = max(model_names, key=lambda k: np.mean(results[k]["accs"]) if results[k]["accs"] else 0)
     joblib.dump({
