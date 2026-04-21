@@ -21,8 +21,6 @@ DIRECTIONS            = ["doprava", "dolava"]
 LOCAL_DATA_DIR        = "./data_swipe"
 SERVICE_ACCOUNT       = "serviceAccountKey.json"
 
-USE_FEATURE_SELECTION = False
-TOP_N_FEATURES        = 40
 N_FOLDS               = 5
 
 RE_TOUCH = re.compile(r"kolo(\d+)_(doprava|dolava)_touch\.csv", re.IGNORECASE)
@@ -249,18 +247,7 @@ def make_models():
     }
 
 
-def select_features(X, y, feature_names):
-    rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-    rf.fit(X, y)
-    top_idx = np.argsort(rf.feature_importances_)[::-1][:TOP_N_FEATURES]
-    print(f"Feature selection: top {TOP_N_FEATURES} z {X.shape[1]} príznakov")
-    return X[:, top_idx], [feature_names[i] for i in top_idx]
-
-
 def train_and_evaluate(X, y, feature_names):
-    if USE_FEATURE_SELECTION:
-        X, feature_names = select_features(X, y, feature_names)
-
     users       = np.unique(y)
     model_names = list(make_models().keys())
     results     = {name: {"fars": [], "frrs": [], "eers": [], "aucs": [], "accs": [],
