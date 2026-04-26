@@ -34,7 +34,7 @@ def make_models():
     }
 
 
-def train_and_evaluate(X, y, feature_names, output_pkl, min_samples=2):
+def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2):
     users       = np.unique(y)
     model_names = list(make_models().keys())
     results     = {name: {"fars": [], "frrs": [], "eers": [], "aucs": [], "accs": [],
@@ -123,10 +123,12 @@ def train_and_evaluate(X, y, feature_names, output_pkl, min_samples=2):
               f"{np.mean(r['cv_aucs']):>8.3f} {sum(r['hits']):>8} {sum(r['misses']):>8}")
 
     best_name = max(model_names, key=lambda k: np.mean(results[k]["accs"]) if results[k]["accs"] else 0)
-    joblib.dump({
-        "models": best_models[best_name],
-        "feature_names": feature_names,
-        "model_type": best_name,
-    }, output_pkl)
-    print(f"\nNajlepší model: {best_name} "
-          f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> {output_pkl}")
+    if output_pkl is not None:
+        joblib.dump({
+            "models": best_models[best_name],
+            "feature_names": feature_names,
+            "model_type": best_name,
+        }, output_pkl)
+        print(f"\nNajlepší model: {best_name} "
+              f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> {output_pkl}")
+    return results

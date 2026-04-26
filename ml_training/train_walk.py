@@ -114,6 +114,7 @@ def main():
     args = parser.parse_args()
 
     X, y, feature_names = load_dataset(args.data_dir, args.window_size, args.window_step)
+    X, feature_names = select_features(X, y, feature_names)
     train_and_evaluate(X, y, feature_names, "walk_model.pkl", min_samples=5)
 
 if __name__ == "__main__":

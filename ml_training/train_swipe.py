@@ -227,6 +227,7 @@ def main():
         download_from_firebase(args.data_dir)
 
     X, y, feature_names = load_dataset(args.data_dir)
+    X, feature_names = select_features(X, y, feature_names)
     train_and_evaluate(X, y, feature_names, "swipe_model.pkl")
 
 

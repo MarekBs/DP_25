@@ -18,6 +18,21 @@ def correlation_filter(X, feature_names):
     return df_new.values, kept
 
 
+def compute_importances(X, y, feature_names):
+    users = np.unique(y)
+    importances = np.zeros(X.shape[1])
+    X_sc = StandardScaler().fit_transform(X)
+    for user in users:
+        y_bin = (y == user).astype(int)
+        if y_bin.sum() < 2:
+            continue
+        rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+        rf.fit(X_sc, y_bin)
+        importances += rf.feature_importances_
+    importances /= len(users)
+    return importances
+
+
 def rf_importance_filter(X, y, feature_names):
     print(f"[2/2] RF Importance : počítam cez {len(np.unique(y))} používateľov ...")
     users = np.unique(y)
