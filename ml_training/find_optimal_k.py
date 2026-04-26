@@ -4,7 +4,7 @@ import numpy as np
 from feature_selection import correlation_filter, compute_importances
 from training import train_and_evaluate
 
-K_VALUES = [3, 5, 7, 10, 12, 15, 17, 20, 22, 25, 28, 30, 33, 36, 39, None]
+K_VALUES = list(range(2, 39, 2)) + [None]
 
 GESTURE_CONFIG = {
     "swipe":  {"module": "train_swipe",  "data_dir": "./data_swipe",      "train_kwargs": {}},
