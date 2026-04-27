@@ -288,13 +288,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--data-dir", default=LOCAL_DATA_DIR)
+    parser.add_argument("--fs", choices=["corr", "full"], default=None)
+    parser.add_argument("--model", default="Random Forest",
+                        choices=["SVM", "Random Forest", "XGBoost", "KNN"])
     args = parser.parse_args()
 
     if args.download:
         download_from_firebase(args.data_dir)
 
     X, y, feature_names = load_dataset(args.data_dir)
-    X, feature_names = select_features(X, y, feature_names)
+    X, feature_names = select_features(X, y, feature_names, gesture="zoom", model=args.model, mode=args.fs or "none")
     train_and_evaluate(X, y, feature_names, "zoom_model.pkl")
 
 
