@@ -1,0 +1,11 @@
+{
+  "KNN": {
+    "params": {
+      "n_neighbors": 10,
+      "metric": "manhattan",
+      "weights": "distance",
+      "algorithm": "brute"
+    },
+    "eer": 0.03020999568552405
+  }
+}

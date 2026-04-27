@@ -12,31 +12,41 @@ import joblib
 N_FOLDS = 5
 
 
-def make_models():
+def make_models(params=None):
+    p = params or {}
     return {
         "SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", SVC(kernel="rbf", C=1.0, gamma="scale", probability=True, random_state=42))
+            ("clf", SVC(probability=True, random_state=42,
+                        **{"kernel": "rbf", "C": 1.9911, "gamma": "auto", **p.get("SVM", {})}))
         ]),
         "Random Forest": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1))
+            ("clf", RandomForestClassifier(random_state=42, n_jobs=-1,
+                        **{"n_estimators": 100, "max_depth": 30, "min_samples_leaf": 1,
+                           "min_samples_split": 2, "max_features": "sqrt", "bootstrap": True,
+                           **p.get("Random Forest", {})}))
         ]),
         "XGBoost": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", XGBClassifier(n_estimators=100, max_depth=6, learning_rate=0.3,
-                                  eval_metric="logloss", random_state=42, n_jobs=-1))
+            ("clf", XGBClassifier(eval_metric="logloss", random_state=42, n_jobs=-1,
+                        **{"n_estimators": 150, "max_depth": 4, "learning_rate": 0.0984,
+                           "subsample": 0.9629, "colsample_bytree": 0.9769,
+                           "min_child_weight": 1, "reg_alpha": 0.000285, "reg_lambda": 5.2905,
+                           **p.get("XGBoost", {})}))
         ]),
         "KNN": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", KNeighborsClassifier(n_neighbors=5))
+            ("clf", KNeighborsClassifier(**{"n_neighbors": 10, "metric": "manhattan",
+                           "weights": "distance", "algorithm": "brute", **p.get("KNN", {})}))
         ]),
     }
 
 
-def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2):
+def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2, params=None, only_models=None, verbose=True):
     users       = np.unique(y)
-    model_names = list(make_models().keys())
+    model_names = [k for k in make_models(params).keys()
+                   if only_models is None or k in only_models]
     results     = {name: {"fars": [], "frrs": [], "eers": [], "aucs": [], "accs": [],
                           "precs": [], "recs": [], "f1s": [], "hits": [], "misses": [],
                           "cv_aucs": []}
@@ -54,7 +64,8 @@ def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2):
         neg_idx = neg_idx[:len(pos_idx)]
 
         if len(pos_idx) < min_samples:
-            print(f"  [SKIP] {target_user}: príliš málo pozitívnych vzoriek")
+            if verbose:
+                print(f"  [SKIP] {target_user}: príliš málo pozitívnych vzoriek")
             continue
 
         n_pos_test = max(1, int(round(len(pos_idx) * 0.30)))
@@ -74,7 +85,11 @@ def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2):
             continue
         cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-        for name, model in make_models().items():
+        for name, model in {k: v for k, v in make_models(params).items() if k in model_names}.items():
+            if name == "KNN":
+                clf = model.named_steps["clf"]
+                min_cv_size = len(X_trainval) * (n_splits - 1) // n_splits
+                clf.n_neighbors = min(clf.n_neighbors, min_cv_size - 1)
             cv_auc = cross_val_score(model, X_trainval, y_trainval,
                                      cv=cv, scoring="roc_auc").mean()
             model.fit(X_trainval, y_trainval)
@@ -110,17 +125,18 @@ def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2):
             results[name]["misses"].append(int((y_pred != y_test).sum()))
             best_models[name][target_user] = model
 
-    hdr = f"\n{'Model':<20} {'Acc':>6} {'FAR':>6} {'FRR':>6} {'EER':>6} {'Prec':>6} {'Rec':>6} {'F1':>6} {'AUC':>6} {'CV-AUC':>8} {'Hits':>8} {'Miss':>8}"
-    print(hdr)
-    print("-" * len(hdr))
-    for name in model_names:
-        r = results[name]
-        if not r["accs"]:
-            continue
-        print(f"{name:<20} {np.mean(r['accs']):>6.3f} {np.mean(r['fars']):>6.3f} "
-              f"{np.mean(r['frrs']):>6.3f} {np.mean(r['eers']):>6.3f} {np.mean(r['precs']):>6.3f} "
-              f"{np.mean(r['recs']):>6.3f} {np.mean(r['f1s']):>6.3f} {np.mean(r['aucs']):>6.3f} "
-              f"{np.mean(r['cv_aucs']):>8.3f} {sum(r['hits']):>8} {sum(r['misses']):>8}")
+    if verbose:
+        hdr = f"\n{'Model':<20} {'Acc':>6} {'FAR':>6} {'FRR':>6} {'EER':>6} {'Prec':>6} {'Rec':>6} {'F1':>6} {'AUC':>6} {'CV-AUC':>8} {'Hits':>8} {'Miss':>8}"
+        print(hdr)
+        print("-" * len(hdr))
+        for name in model_names:
+            r = results[name]
+            if not r["accs"]:
+                continue
+            print(f"{name:<20} {np.mean(r['accs']):>6.3f} {np.mean(r['fars']):>6.3f} "
+                  f"{np.mean(r['frrs']):>6.3f} {np.mean(r['eers']):>6.3f} {np.mean(r['precs']):>6.3f} "
+                  f"{np.mean(r['recs']):>6.3f} {np.mean(r['f1s']):>6.3f} {np.mean(r['aucs']):>6.3f} "
+                  f"{np.mean(r['cv_aucs']):>8.3f} {sum(r['hits']):>8} {sum(r['misses']):>8}")
 
     best_name = max(model_names, key=lambda k: np.mean(results[k]["accs"]) if results[k]["accs"] else 0)
     if output_pkl is not None:

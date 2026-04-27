@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
 CORR_THRESHOLD = 0.95
-TOP_K_FEATURES = None
+TOP_K_FEATURES = 60
 
 
 def correlation_filter(X, feature_names):
