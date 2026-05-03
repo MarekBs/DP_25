@@ -65,6 +65,8 @@ Modely využívajú kombináciu:
 
 Použité algoritmy:
 - Random Forest
+- SVM
+- KNN
 - XGBoost
 - optimalizácia pomocou Optuna
 
