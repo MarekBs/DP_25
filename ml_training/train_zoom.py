@@ -9,7 +9,7 @@ from feature_selection import select_features
 
 FIREBASE_BUCKET       = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH          = "touch_zoom_behametrics"
-LOCAL_DATA_DIR        = "../data/zoom"
+LOCAL_DATA_DIR        = str(Path(__file__).parent.parent / "data" / "zoom")
 SERVICE_ACCOUNT       = "serviceAccountKey.json"
 
 

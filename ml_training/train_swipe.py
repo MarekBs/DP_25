@@ -11,7 +11,7 @@ from feature_selection import select_features
 FIREBASE_BUCKET       = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH          = "touch_gallery_behametrics"
 DIRECTIONS            = ["doprava", "dolava"]
-LOCAL_DATA_DIR        = "../data/swipe"
+LOCAL_DATA_DIR        = str(Path(__file__).parent.parent / "data" / "swipe")
 SERVICE_ACCOUNT       = "serviceAccountKey.json"
 
 
