@@ -60,7 +60,7 @@ Projekt pracuje s viacerými typmi behaviorálnych dát:
 ## Modely
 
 Modely využívajú kombináciu:
-- dotykových gest
+- dotykových dát
 - senzorických dát (akcelerometer, gyroskop)
 
 Použité algoritmy:
