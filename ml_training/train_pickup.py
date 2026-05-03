@@ -10,7 +10,7 @@ from feature_selection import select_features
 
 FIREBASE_BUCKET  = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH     = "sensors_logs_behametrics/Zdvihnutie k uchu"
-LOCAL_DATA_DIR   = "./data_zdvihnutie"
+LOCAL_DATA_DIR   = "../data/zdvihnutie"
 SERVICE_ACCOUNT  = "serviceAccountKey.json"
 RE_ACCEL = re.compile(r"log(\d+)_sensor_accelerometer\.csv", re.IGNORECASE)
 RE_GYRO  = re.compile(r"log(\d+)_sensor_gyroscope\.csv",     re.IGNORECASE)

@@ -26,6 +26,13 @@ Prehľad:
 ================================================================================
   ŠTRUKTÚRA PROJEKTU
 ------------------
+data/
+  ├── swipe/        – dáta pre swipe gesto
+  ├── zoom/         – dáta pre zoom/pinch gesto
+  ├── walk/         – dáta pre chôdzu
+  ├── stol/         – dáta pre položenie na stôl
+  └── zdvihnutie/   – dáta pre zdvihnutie k uchu
+
 ml_training/
   ├── train_swipe.py        – swipe gesto (len dotyk)
   ├── train_zoom.py         – zoom/pinch gesto (len dotyk)
@@ -132,7 +139,7 @@ Zmena:
 Predvolené dátové adresáre sú relatívne (./data_swipe, ./data_zoom, ...).
 Ak chceš použiť iný adresár:
 
-    python train_swipe.py --data-dir C:/moje_data/swipe
+    python train_swipe.py --data-dir C:/DP_FINAL/DP_25/data/swipe
 
 
 ================================================================================

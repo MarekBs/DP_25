@@ -12,7 +12,7 @@ from core import (sanitize_path, parse_sensor_file, clip_sensor_to_segment,
 FIREBASE_BUCKET = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH    = "touch_gallery_behametrics"
 DIRECTIONS      = ["doprava", "dolava"]
-LOCAL_DATA_DIR  = "./data_swipe"
+LOCAL_DATA_DIR  = "../../data/swipe"
 SERVICE_ACCOUNT = "serviceAccountKey.json"
 
 RE_TOUCH = re.compile(r"kolo(\d+)_(doprava|dolava)_touch\.csv",                re.IGNORECASE)

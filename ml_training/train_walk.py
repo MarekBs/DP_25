@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 from training import train_and_evaluate
 from feature_selection import select_features
 
-LOCAL_DATA_DIR = "./data_walk"
+LOCAL_DATA_DIR = "../data/walk"
 
 WINDOW_SIZE = 256   # vzorky na okno
 WINDOW_STEP = 128   # krok (50% overlap)

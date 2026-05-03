@@ -10,7 +10,7 @@ from core import (sanitize_path, parse_sensor_file, clip_sensor_to_segment,
 
 FIREBASE_BUCKET = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH    = "touch_zoom_behametrics"
-LOCAL_DATA_DIR  = "./data_zoom"
+LOCAL_DATA_DIR  = "../../data/zoom"
 SERVICE_ACCOUNT = "serviceAccountKey.json"
 
 RE_TOUCH = re.compile(r"log(\d+)_touch\.csv",                 re.IGNORECASE)

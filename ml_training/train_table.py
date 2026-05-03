@@ -10,7 +10,7 @@ from feature_selection import select_features
 
 FIREBASE_BUCKET       = "dpapp-18ab8.firebasestorage.app"
 GESTURE_PATH          = "sensors_logs_behametrics/Položenie na stôl"
-LOCAL_DATA_DIR        = "./data_stol"
+LOCAL_DATA_DIR        = "../data/stol"
 SERVICE_ACCOUNT       = "serviceAccountKey.json"
 
 
