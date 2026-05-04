@@ -140,11 +140,33 @@ def train_and_evaluate(X, y, feature_names, output_pkl=None, min_samples=2, para
 
     best_name = max(model_names, key=lambda k: np.mean(results[k]["accs"]) if results[k]["accs"] else 0)
     if output_pkl is not None:
+        # retrain each user's model on ALL data (not just the 70 % trainval split)
+        final_models = {}
+        for target_user in users:
+            y_bin = (y == target_user).astype(int)
+            rng = np.random.default_rng(42)
+            pos_idx = np.where(y_bin == 1)[0]
+            neg_idx = np.where(y_bin == 0)[0]
+            rng.shuffle(neg_idx)
+            neg_idx = neg_idx[:len(pos_idx)]
+            all_idx = np.concatenate([pos_idx, neg_idx])
+            X_all, y_all = X[all_idx], y_bin[all_idx]
+            if len(np.unique(y_all)) < 2 or len(y_all) < min_samples:
+                continue
+            final_model = make_models(params)[best_name]
+            if best_name == "KNN":
+                final_model.named_steps["clf"].n_neighbors = min(
+                    final_model.named_steps["clf"].n_neighbors, len(X_all) - 1
+                )
+            final_model.fit(X_all, y_all)
+            final_models[target_user] = final_model
+
         joblib.dump({
-            "models": best_models[best_name],
+            "models": final_models,
             "feature_names": feature_names,
             "model_type": best_name,
         }, output_pkl)
         print(f"\nNajlepší model: {best_name} "
-              f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> {output_pkl}")
+              f"(avg acc={np.mean(results[best_name]['accs']):.4f}) -> {output_pkl}"
+              f"\n  Retrain na 100 % dát: {len(final_models)} používateľov")
     return results

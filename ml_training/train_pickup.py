@@ -175,7 +175,7 @@ def main():
 
     X, y, feature_names = load_dataset(args.data_dir)
     X, feature_names = select_features(X, y, feature_names, gesture="pickup", model=args.model, mode=args.fs or "none")
-    train_and_evaluate(X, y, feature_names, "gesture_model_zdvihnutie.pkl")
+    train_and_evaluate(X, y, feature_names, str(Path(__file__).parent.parent / "gesture_model_zdvihnutie.pkl"))
 
 
 if __name__ == "__main__":

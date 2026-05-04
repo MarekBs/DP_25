@@ -19,10 +19,10 @@ OPTIMAL_K = {
 }
 
 GESTURE_CONFIG = {
-    "swipe":  {"module": "train_swipe",  "data_dir": "./data_swipe",      "min_samples": 2},
-    "table":  {"module": "train_table",  "data_dir": "./data_stol",       "min_samples": 2},
-    "pickup": {"module": "train_pickup", "data_dir": "./data_zdvihnutie", "min_samples": 2},
-    "zoom":   {"module": "train_zoom",   "data_dir": "./data_zoom",       "min_samples": 2},
+    "swipe":  {"module": "train_swipe",  "data_dir": "../data/swipe",      "min_samples": 2},
+    "table":  {"module": "train_table",  "data_dir": "../data/stol",       "min_samples": 2},
+    "pickup": {"module": "train_pickup", "data_dir": "../data/zdvihnutie", "min_samples": 2},
+    "zoom":   {"module": "train_zoom",   "data_dir": "../data/zoom",       "min_samples": 2},
 }
 
 MODELS = list(make_models().keys())

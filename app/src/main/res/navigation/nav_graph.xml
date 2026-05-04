@@ -53,6 +53,9 @@
             android:id="@+id/action_introFragment_to_cropFragment"
             app:destination="@id/cropFragment" />
         <action
+            android:id="@+id/action_introFragment_to_verifyPickupFragment"
+            app:destination="@id/verifyPickupFragment" />
+        <action
             android:id="@+id/action_introFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/introFragment"
@@ -103,9 +106,21 @@
         android:id="@+id/cropFragment"
         android:name="com.example.dp_app.fragments.CropFragment"
         android:label="CropFragment">
-        
+
         <action
             android:id="@+id/action_cropFragment_to_introFragment"
+            app:destination="@id/introFragment"
+            app:popUpTo="@id/introFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verifyPickupFragment"
+        android:name="com.example.dp_app.fragments.VerifyPickupFragment"
+        android:label="VerifyPickupFragment">
+
+        <action
+            android:id="@+id/action_verifyPickupFragment_to_introFragment"
             app:destination="@id/introFragment"
             app:popUpTo="@id/introFragment"
             app:popUpToInclusive="true" />

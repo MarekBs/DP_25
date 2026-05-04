@@ -102,7 +102,7 @@
             android:id="@+id/btn_zoom"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="12dp"
             android:text="Dotykový zoom"
             android:textAllCaps="false"
             android:textSize="15sp"
@@ -114,6 +114,21 @@
             app:iconPadding="12dp"
             app:iconTint="@color/white" />
 
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_verify_pickup"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="32dp"
+            android:text="Overiť identitu (zdvihnutie)"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            app:backgroundTint="@color/accent_soft"
+            app:cornerRadius="12dp"
+            app:elevation="0dp"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/white" />
 
         <View
             android:layout_width="match_parent"

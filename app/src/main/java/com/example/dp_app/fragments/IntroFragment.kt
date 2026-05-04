@@ -19,6 +19,7 @@ class IntroFragment : Fragment() {
     private lateinit var btnTouch: MaterialButton
     private lateinit var btnLogging: MaterialButton
     private lateinit var btnZoom: MaterialButton
+    private lateinit var btnVerifyPickup: MaterialButton
 
     private val originalTexts = mutableMapOf<MaterialButton, String>()
 
@@ -35,6 +36,7 @@ class IntroFragment : Fragment() {
         btnTouch = view.findViewById(R.id.btn_touch)
         btnLogging = view.findViewById(R.id.btn_logging)
         btnZoom = view.findViewById(R.id.btn_zoom)
+        btnVerifyPickup = view.findViewById(R.id.btn_verify_pickup)
 
         listOf(btnSensors, btnTouch, btnLogging, btnZoom).forEach {
             originalTexts[it] = it.text.toString()
@@ -51,6 +53,9 @@ class IntroFragment : Fragment() {
         }
         btnZoom.setOnClickListener {
             findNavController().navigate(R.id.action_introFragment_to_cropFragment)
+        }
+        btnVerifyPickup.setOnClickListener {
+            findNavController().navigate(R.id.action_introFragment_to_verifyPickupFragment)
         }
         view.findViewById<MaterialButton>(R.id.btn_logout).setOnClickListener {
             UserSession.clear()

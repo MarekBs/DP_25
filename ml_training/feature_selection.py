@@ -20,7 +20,7 @@ def correlation_filter(X, feature_names):
     to_drop = [col for col in upper.columns if any(upper[col] > CORR_THRESHOLD)]
     df_new = df.drop(columns=to_drop)
     kept = df_new.columns.tolist()
-    print(f"[1/2] CorrFilter    : {X.shape[1]:>4} → {len(kept):>4} features  (odstránených {len(to_drop)})")
+    print(f"[1/2] CorrFilter    : {X.shape[1]:>4} -> {len(kept):>4} features  (odstranených {len(to_drop)})")
     return df_new.values, kept
 
 
@@ -40,14 +40,14 @@ def compute_importances(X, y, feature_names):
 
 
 def rf_importance_filter(X, y, feature_names, k):
-    print(f"[2/2] RF Importance : počítam cez {len(np.unique(y))} používateľov ...")
+    print(f"[2/2] RF Importance : pocitam cez {len(np.unique(y))} pouzivatelov ...")
     importances = compute_importances(X, y, feature_names)
 
     top_idx = np.argsort(importances)[::-1][:k]
     kept = [feature_names[i] for i in top_idx]
     X_new = X[:, top_idx]
 
-    print(f"           Výsledok: {X.shape[1]:>4} → {X_new.shape[1]:>4} features  (top {k})")
+    print(f"           Vysledok: {X.shape[1]:>4} -> {X_new.shape[1]:>4} features  (top {k})")
     print(f"\n{'#':<5} {'Feature':<40} {'Importance':>10}")
     print("-" * 57)
     for rank, (name, imp) in enumerate(zip(kept, importances[top_idx]), 1):
@@ -59,21 +59,21 @@ def rf_importance_filter(X, y, feature_names, k):
 
 def select_features(X, y, feature_names, gesture=None, model="Random Forest", mode="none"):
     if mode == "none":
-        print("[Feature selection: vypnutá]\n")
+        print("[Feature selection: vypnuta]\n")
         return X, feature_names
 
     print("\n" + "=" * 57)
     n_orig = X.shape[1]
 
     if mode == "corr":
-        print("FEATURE SELECTION  (korelačný filter)")
+        print("FEATURE SELECTION  (korelacny filter)")
         print("=" * 57)
         X, feature_names = correlation_filter(X, feature_names)
 
     elif mode == "full":
         k = OPTIMAL_K.get(gesture, {}).get(model)
         if k is None:
-            print(f"FEATURE SELECTION  (korelačný filter, k neznáme pre {gesture}/{model})")
+            print(f"FEATURE SELECTION  (korelacny filter, k nezname pre {gesture}/{model})")
             print("=" * 57)
             X, feature_names = correlation_filter(X, feature_names)
         else:
@@ -82,5 +82,5 @@ def select_features(X, y, feature_names, gesture=None, model="Random Forest", mo
             X, feature_names = correlation_filter(X, feature_names)
             X, feature_names = rf_importance_filter(X, y, feature_names, k)
 
-    print(f"Celkovo: {n_orig} → {len(feature_names)} features\n")
+    print(f"Celkovo: {n_orig} -> {len(feature_names)} features\n")
     return X, feature_names
