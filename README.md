@@ -5,6 +5,8 @@ Používateľ je rozpoznávaný podľa spôsobu vykonávania dotykových gest a 
 
 Tréningové skripty, dáta a server sa nachádzajú v repozitári [DP_25_ml](https://github.com/MarekBs/DP_25_ml).
 
+APK na stiahnutie: [github.com/MarekBs/apk-release/releases](https://github.com/MarekBs/apk-release/releases)
+
 ---
 
 ## Funkcie aplikácie
