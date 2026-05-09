@@ -1,11 +1,9 @@
-# Behaviorálna biometria – autentifikácia používateľa
+# Behaviorálna biometria – Android aplikácia
 
-Systém autentifikácie používateľa na základe behaviorálnych biometrík.  
+Android aplikácia na autentifikáciu používateľa na základe behaviorálnych biometrík.  
 Používateľ je rozpoznávaný podľa spôsobu vykonávania dotykových gest a pohybov zariadenia.
 
-Projekt pozostáva z:
-- Android aplikácie na zber dát
-- Python skriptov na tréning modelov strojového učenia
+Tréningové skripty, dáta a server sa nachádzajú v repozitári [DP_25_ml](https://github.com/MarekBs/DP_25_ml).
 
 ---
 
@@ -13,70 +11,25 @@ Projekt pozostáva z:
 
 ```
 ├── app/             # Android aplikácia (Kotlin)
-├── ml_training/     # Skripty na tréning modelov
-│   └── multimodal/  # Kombinácia dotykových dát a senzorov
-└── data/            # Tréningové dáta
-                    # (swipe, zoom, walk, stol, zdvihnutie)
+│   └── src/         # Zdrojový kód
+├── gradle/          # Gradle wrapper
+└── build.gradle.kts # Konfigurácia buildu
 ```
 
 ---
 
 ## Požiadavky
 
-- Python 3.9+
-
-### Inštalácia závislostí
-
-```bash
-pip install numpy pandas scipy scikit-learn xgboost joblib optuna
-```
+- Android Studio
+- Android SDK 26+
+- Google Services (`google-services.json`)
 
 ---
 
 ## Použitie
 
-1. Spusti Android aplikáciu na zber dát  
-2. Ulož dáta do priečinka `data/`  
-3. Spusti tréning modelov:
+1. Otvor projekt v Android Studio
+2. Pripoj Android zariadenie alebo spusti emulátor
+3. Spusti aplikáciu (Run → Run 'app')
 
-```bash
-cd ml_training
-python train.py
-```
-
----
-
-## Dáta
-
-Projekt pracuje s viacerými typmi behaviorálnych dát:
-- swipe (potiahnutie)
-- zoom (priblíženie)
-- walk (chôdza)
-- stol (položené zariadenie)
-- zdvihnutie (zdvihnutie zariadenia k uchu)
-
----
-
-## Modely
-
-Modely využívajú kombináciu:
-- dotykových dát
-- senzorických dát (akcelerometer, gyroskop)
-
-Použité algoritmy:
-- Random Forest
-- SVM
-- KNN
-- XGBoost
-- optimalizácia pomocou Optuna
-
----
-
-## Dokumentácia
-
-Podrobný popis skriptov, spúšťacích príkazov a štruktúry modelov sa nachádza v:
-
-```
-Manual.txt
-```
-
+Pre autentifikáciu je potrebný bežiaci Flask server z repozitára [DP_25_ml](https://github.com/MarekBs/DP_25_ml).
