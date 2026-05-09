@@ -1,9 +1,16 @@
 # Behaviorálna biometria – Android aplikácia
 
-Android aplikácia na autentifikáciu používateľa na základe behaviorálnych biometrík.  
+Android aplikácia slúži na **zber behaviorálnych biometrických dát** a **autentifikáciu používateľa**.  
 Používateľ je rozpoznávaný podľa spôsobu vykonávania dotykových gest a pohybov zariadenia.
 
 Tréningové skripty, dáta a server sa nachádzajú v repozitári [DP_25_ml](https://github.com/MarekBs/DP_25_ml).
+
+---
+
+## Funkcie aplikácie
+
+- **Zber dát** – zaznamenávanie dotykových gest (swipe, zoom) a pohybov zariadenia (chôdza, položenie na stôl, zdvihnutie k uchu) spolu so senzormi (akcelerometer, gyroskop)
+- **Autentifikácia** – overenie identity používateľa na základe natrénovaných ML modelov cez Flask server
 
 ---
 
