@@ -34,13 +34,29 @@ data/
   └── zdvihnutie/   – dáta pre zdvihnutie k uchu
 
 ml_training/
-  ├── train_swipe.py        – swipe gesto (len dotyk)
-  ├── train_zoom.py         – zoom/pinch gesto (len dotyk)
-  ├── train_walk.py         – chôdza (akcelerometer)
-  ├── train_table.py        – položenie na stôl (acc + gyroskop)
-  ├── train_pickup.py       – zdvihnutie k uchu (acc + gyroskop)
+  ├── train_swipe.py              – swipe gesto (len dotyk)
+  ├── train_zoom.py               – zoom/pinch gesto (len dotyk)
+  ├── train_walk.py               – chôdza (akcelerometer)
+  ├── train_table.py              – položenie na stôl (acc + gyroskop)
+  ├── train_pickup.py             – zdvihnutie k uchu (acc + gyroskop)
+  ├── training.py                 – zdieľaná logika trénovania a vyhodnocovania
+  │                                 (make_models, train_and_evaluate); používajú
+  │                                 ju všetky train_*.py skripty
+  ├── feature_selection.py        – korelačný filter a RF importance filter;
+  │                                 obsahuje aj tabuľku optimálnych k pre každé
+  │                                 gesto a model (OPTIMAL_K)
+  ├── find_optimal_k.py           – prehľad presnosti pre rôzne počty príznakov
+  │                                 (k = 2,4,...,38,all) pre zvolené gesto;
+  │                                 pomáha zistiť, koľko príznakov je optimálnych
+  │                                 Použitie: python find_optimal_k.py <gesto>
+  ├── find_optimal_threshold.py   – hľadanie optimálneho prahu pre každého
+  │                                 používateľa; výstup: optimal_thresholds.json
+  ├── find_optimal_params_optuna.py – hľadanie hyperparametrov pomocou Optuna
   │
   └── multimodal/
+        ├── core.py         – zdieľané funkcie pre multimodálne skripty
+        │                     (načítanie senzorov, extrakcia príznakov,
+        │                     zarovnanie dotyk + acc/gyroskop)
         ├── train_swipe.py  – swipe gesto (dotyk + senzory)
         └── train_zoom.py   – zoom/pinch gesto (dotyk + senzory)
 
@@ -111,10 +127,40 @@ Tento súbor potom používa aplikácia pri autentifikácii.
 
 
 ================================================================================
-  HĽADANIE OPTIMÁLNYCH HYPERPARAMETROV
+  HYPERPARAMETRE MODELOV
 ================================================================================
 
-Ak chceš experimentovať s hyperparametrami (používa Optuna):
+Základné spustenie (python train_pickup.py atď.) automaticky používa
+optimalizované hyperparametre nájdené pomocou Optuna:
+
+    Model           Optimalizované parametre (použité pri spustení)
+    --------------- -----------------------------------------------
+    SVM             C=1.9911, gamma="auto", kernel="rbf"
+    Random Forest   n_estimators=100, max_depth=30, min_samples_leaf=1,
+                    min_samples_split=2, max_features="sqrt"
+    XGBoost         n_estimators=150, max_depth=4, learning_rate=0.0984,
+                    subsample=0.9629, colsample_bytree=0.9769
+    KNN             n_neighbors=10, metric="manhattan", weights="distance"
+
+Ak chceš použiť základné sklearn defaulty, uprav v training.py
+funkciu make_models() – nahraď hodnoty nasledovnými:
+
+    Model           Základné sklearn defaulty
+    --------------- -----------------------------------------------
+    SVM             C=1.0, gamma="scale"
+    Random Forest   n_estimators=100  (max_depth=None, ostatné default)
+    XGBoost         n_estimators=100, max_depth=6, learning_rate=0.3
+    KNN             n_neighbors=5
+
+Príklad zmeny pre SVM v make_models():
+
+    # optimalizované (teraz)
+    SVC(probability=True, kernel="rbf", C=1.9911, gamma="auto")
+
+    # základné sklearn defaulty
+    SVC(probability=True)
+
+Hľadanie nových optimálnych hyperparametrov (Optuna):
 
     cd ml_training
     python find_optimal_params_optuna.py
