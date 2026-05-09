@@ -31,14 +31,3 @@ APK na stiahnutie: [github.com/MarekBs/apk-release/releases](https://github.com/
 
 - Android Studio
 - Android SDK 26+
-- Google Services (`google-services.json`)
-
----
-
-## Použitie
-
-1. Otvor projekt v Android Studio
-2. Pripoj Android zariadenie alebo spusti emulátor
-3. Spusti aplikáciu (Run → Run 'app')
-
-Pre autentifikáciu je potrebný bežiaci Flask server z repozitára [DP_25_ml](https://github.com/MarekBs/DP_25_ml).
