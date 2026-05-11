@@ -61,13 +61,8 @@ python train_pickup.py --fs full --model SVM
 ```
 Výstup: `gesture_model_zdvihnutie.pkl`
 
-**2. Nájsť optimálny prah rozhodovania:**
-```bash
-python find_optimal_threshold.py
-```
-Výstup: `optimal_thresholds.json`
 
-**3. Spustiť server** (`gesture_model_zdvihnutie.pkl` a `optimal_thresholds.json` musia byť v rovnakom priečinku ako `server.py`):
+**2. Spustiť server** (`gesture_model_zdvihnutie.pkl` a `optimal_thresholds.json` musia byť v rovnakom priečinku ako `server.py`):
 ```bash
 python server.py
 ```
