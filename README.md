@@ -82,5 +82,8 @@ Podrobnosti o tréningu modelov sú v `Manual_ML.txt`.
 
 Prístupový kľúč k Firebase Storage (`serviceAccountKey.json`) je dostupný iba na vyžiadanie. Bez neho nie je možné nahrávať ani sťahovať dáta z úložiska – kľúč poskytuje plný prístup k všetkým zozbieraným dátam.
 
+Všetky doteraz zozbierané dáta sú stiahnuté v tomto repozitári v priečinku `data/`.
+
 Ak by niekto chcel pridať vlastné logy a pridať sa do modelov, je potrebné po zbere dát stiahnuť dáta z Firebase, pretrénovať modely a s novými modelmi spustiť server (viď `Manual_ML.txt`).
+
 
