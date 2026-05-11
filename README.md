@@ -50,7 +50,7 @@ Zozbierané dáta sa automaticky nahrávajú do Firebase Storage.
 
 ## Overenie identity
 
-Aplikácia umožňuje overiť identitu používateľa gestom zdvihnutia k uchu. Výsledok overenia (autentifikovaný / odmietnutý) sa zobrazí po 3 sekundách záznamu gesta.
+Aplikácia umožňuje overiť identitu používateľa gestom zdvihnutia k uchu. Po 3 sekundách záznamu sa gesto odošle na server a aplikácia zobrazí výsledok – či bol používateľ rozpoznaný alebo odmietnutý.
 
 Na fungovanie overenia je potrebné mať spustený Flask server. Postup:
 
