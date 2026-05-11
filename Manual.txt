@@ -1,0 +1,174 @@
+================================================================================
+  MANUÁL – TRÉNING MODELOV BEHAVIORÁLNEJ BIOMETRIE
+================================================================================
+
+
+================================================================================
+  POŽIADAVKY
+================================================================================
+
+  Python 3.9 alebo novší.
+
+  Inštalácia závislostí:
+
+      pip install numpy pandas scipy scikit-learn xgboost joblib optuna
+
+  Knižnice:
+
+      numpy        – numerické výpočty
+      pandas       – načítanie a spracovanie CSV súborov
+      scipy        – štatistické funkcie (skewness, kurtosis, FFT, find_peaks)
+      scikit-learn – ML algoritmy (SVM, Random Forest, KNN), pipeline, metriky
+      xgboost      – XGBoost klasifikátor
+      joblib       – ukladanie a načítanie .pkl modelov
+      optuna       – len pre find_optimal_params_optuna.py
+
+
+================================================================================
+  ŠTRUKTÚRA PROJEKTU
+================================================================================
+
+  data/
+  ├── swipe/           – záznamy swipe gesta
+  ├── zoom/            – záznamy zoom/pinch gesta
+  ├── walk/            – záznamy chôdze
+  ├── stol/            – záznamy položenia na stôl
+  └── zdvihnutie/      – záznamy zdvihnutia k uchu
+
+  ml_training/
+  ├── train_swipe.py              – tréning: swipe gesto
+  ├── train_zoom.py               – tréning: zoom/pinch gesto
+  ├── train_walk.py               – tréning: chôdza
+  ├── train_table.py              – tréning: položenie na stôl
+  ├── train_pickup.py             – tréning: zdvihnutie k uchu
+  ├── training.py                 – zdieľaná logika trénovania a vyhodnocovania
+  ├── feature_selection.py        – korelačný filter a RF importance filter
+  ├── find_optimal_k.py           – prehľad presnosti pre rôzne počty príznakov
+  ├── find_optimal_threshold.py   – hľadanie optimálnych prahov
+  ├── find_optimal_params_optuna.py – hľadanie hyperparametrov (Optuna)
+  └── multimodal/
+        ├── core.py               – zdieľané funkcie pre multimodálne skripty
+        ├── train_swipe.py        – tréning: swipe gesto (dotyk + senzory)
+        └── train_zoom.py         – tréning: zoom/pinch gesto (dotyk + senzory)
+
+  Výstupné .pkl súbory sa uložia do priečinka, z ktorého sa skript spúšťa.
+
+
+================================================================================
+  TRÉNINGOVÉ SKRIPTY
+================================================================================
+
+  Skripty sa spúšťajú z adresára ml_training/. Každé gesto má vlastný
+  tréningový skript:
+
+      cd ml_training
+      python train_<gesto>.py
+
+  Dostupné gestá: swipe, zoom, walk, table, pickup
+
+  Multimodálne varianty (dotyk + senzory) sú dostupné iba pre swipe a zoom.
+  Nachádzajú sa v podadresári ml_training/multimodal/:
+
+      cd ml_training/multimodal
+      python train_swipe.py
+      python train_zoom.py
+
+
+================================================================================
+  UTILITY SKRIPTY
+================================================================================
+
+  Skripty sa spúšťajú z adresára ml_training/.
+
+      python find_optimal_threshold.py
+          Nájde optimálny prah rozhodovania pre každú kombináciu gesta a modelu.
+          Je potrebné spustiť po tréningu modelov.
+          Výstup: optimal_thresholds.json (používa ho aplikácia pri autentifikácii)
+
+      python find_optimal_k.py <gesto>
+          Zobrazí presnosť modelov pre rôzny počet príznakov (k = 2, 4, ..., all).
+          Pomáha určiť optimálny počet príznakov pre dané gesto.
+
+      python find_optimal_params_optuna.py
+          Hľadá optimálne hyperparametre modelov pomocou Optuna.
+          Odporúča sa spustiť iba pri hľadaní nových hyperparametrov – trvá dlho.
+
+
+================================================================================
+  FEATURE SELECTION
+================================================================================
+
+  Funguje iba pre základné tréningové skripty (nie multimodal).
+  Predvolene je vypnutá – použijú sa všetky príznaky.
+
+  Prepínače:
+
+      --fs corr   rýchly korelačný filter (odstraňuje redundantné príznaky)
+      --fs full   korelačný filter + RF importance (pomalšie, presnejšie)
+
+  Voliteľne je možné určiť model, pre ktorý sa vyberie optimálny počet
+  príznakov (predvolený: Random Forest):
+
+      --model SVM
+      --model "Random Forest"
+      --model XGBoost
+      --model KNN
+
+  Príklady:
+
+      python train_swipe.py  --fs full --model "Random Forest"
+      python train_zoom.py   --fs full --model XGBoost
+      python train_table.py  --fs corr
+      python train_pickup.py --fs full --model SVM
+
+
+================================================================================
+  ĎALŠIE PARAMETRE
+================================================================================
+
+  Vlastná cesta k dátam (ak dáta nie sú v predvolenom priečinku):
+
+      python train_<gesto>.py --data-dir <cesta/k/datam>
+
+  Veľkosť kĺzavého okna pre chôdzu (predvolene: okno = 256, krok = 128):
+
+      python train_walk.py --window-size <velkost> --window-step <krok>
+
+
+================================================================================
+  PREHĽAD VÝSTUPNÝCH SÚBOROV
+================================================================================
+
+  Skript                          Výstupný súbor
+  ──────────────────────────────  ────────────────────────────
+  train_swipe.py                  swipe_model.pkl
+  train_zoom.py                   zoom_model.pkl
+  train_walk.py                   walk_model.pkl
+  train_table.py                  gesture_model_stol.pkl
+  train_pickup.py                 gesture_model_zdvihnutie.pkl
+  multimodal/train_swipe.py       swipe_model_mm.pkl
+  multimodal/train_zoom.py        zoom_model_mm.pkl
+  find_optimal_threshold.py       optimal_thresholds.json
+
+
+================================================================================
+  AKO FUNGUJE TRÉNING
+================================================================================
+
+  Každý skript vyhodnotí 4 algoritmy: SVM, Random Forest, XGBoost, KNN.
+  Pre každého používateľa sa natrénuje samostatný model (prístup 1-vs-all)
+  – model sa učí rozoznať "toto som ja" od "toto nie som ja".
+
+  Po vyhodnotení sa vyberie algoritmus s najlepšou priemernou presnosťou
+  a jeho modely sa uložia do .pkl súboru:
+
+      {
+        "models":        { "user_A": Pipeline, "user_B": Pipeline, ... },
+        "feature_names": [ "x_mean", "y_std", ... ],
+        "model_type":    "Random Forest"
+      }
+
+  Pri autentifikácii aplikácia načíta model daného používateľa, zavolá
+  predict_proba() a výsledok porovná s prahom z optimal_thresholds.json.
+
+================================================================================
