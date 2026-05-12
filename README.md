@@ -8,6 +8,25 @@ Tréningové skripty, dáta a server sa nachádzajú v repozitári [DP_25_ml](ht
 
 ---
 
+## Štruktúra repozitára
+
+```
+DP_25/
+├── app/
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/example/dp_app/
+│       │   ├── MainActivity.kt
+│       │   ├── UserSession.kt
+│       │   ├── fragments/          # UI fragmenty (login, survey, zber dát, overenie)
+│       │   ├── adapters/           # adaptéry (ImageAdapter)
+│       │   └── models/             # ViewModely (Behametrics, Sensor)
+│       └── res/                    # layouty, ikony, navigácia, témy          
+├── README.md
+└── build.gradle.kts
+```
+---
+
 # Manuál – Aplikácia behaviorálnej biometrie
 
 ## Inštalácia
