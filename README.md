@@ -71,7 +71,7 @@ Zozbierané dáta sa automaticky nahrávajú do Firebase Storage.
 
 Aplikácia umožňuje overiť identitu používateľa gestom zdvihnutia k uchu. Po 3 sekundách záznamu sa gesto odošle na server a aplikácia zobrazí výsledok – či bol používateľ rozpoznaný alebo odmietnutý.
 
-Na fungovanie overenia je potrebné mať spustený Flask server. Postup:
+Na fungovanie overenia je potrebné mať spustený Flask server dostupný v repozitári  [DP_25_ml](https://github.com/MarekBs/DP_25_ml). Postup:
 
 **1. Natrénovať model pre gesto zdvihnutia k uchu:**
 ```bash
