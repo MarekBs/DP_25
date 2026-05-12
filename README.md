@@ -71,24 +71,8 @@ Zozbierané dáta sa automaticky nahrávajú do Firebase Storage.
 
 Aplikácia umožňuje overiť identitu používateľa gestom zdvihnutia k uchu. Po 3 sekundách záznamu sa gesto odošle na server a aplikácia zobrazí výsledok – či bol používateľ rozpoznaný alebo odmietnutý.
 
-Na fungovanie overenia je potrebné mať spustený Flask server dostupný v repozitári  [DP_25_ml](https://github.com/MarekBs/DP_25_ml). Postup:
+Na fungovanie overenia je potrebné mať spustený Flask server dostupný v repozitári [DP_25_ml](https://github.com/MarekBs/DP_25_ml), kde sa nachádza aj postup.
 
-**1. Natrénovať model pre gesto zdvihnutia k uchu:**
-```bash
-cd ml_training
-python train_pickup.py --fs full --model SVM
-```
-Výstup: `gesture_model_zdvihnutie.pkl`
-
-
-**2. Spustiť server** (`gesture_model_zdvihnutie.pkl` a `optimal_thresholds.json` musia byť v rovnakom priečinku ako `server.py`):
-```bash
-python server.py
-```
-
-Server beží na adrese `http://0.0.0.0:5000`. Server a zariadenie s aplikáciou musia byť na **rovnakej sieti**. IP adresu zariadenia so serverom je potrebné nastaviť v zdrojovom kóde aplikácie (`VerifyPickupFragment.kt` – konštanta `SERVER_URL`).
-
-Podrobnosti o tréningu modelov sú v `Manual_ML.txt`.
 
 ---
 
