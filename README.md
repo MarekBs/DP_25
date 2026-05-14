@@ -31,7 +31,7 @@ DP_25/
 
 ## Inštalácia
 
-APK súbor je dostupný na: [github.com/MarekBs/apk-release/releases](https://github.com/MarekBs/apk-release/releases/tag/1.1)
+APK súbor je dostupný na: [github.com/MarekBs/apk-release/releases](https://github.com/MarekBs/apk-release/releases/tag/1.2)
 
 Stiahnutý `.apk` súbor sa nainštaluje priamo na zariadení. Je potrebné povoliť inštaláciu z neznámych zdrojov v nastaveniach zariadenia.
 
