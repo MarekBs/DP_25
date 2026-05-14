@@ -91,9 +91,9 @@ class BehametricsFragment : Fragment() {
             viewModel.setSelectedActivity(selected)
             val instructions = when (selected) {
                 "Položenie na stôl" ->
-                    "Trvanie: ~3 sekundy – zastaví sa automaticky\nGesto: položte zariadenie obrazovkou nahor na rovnú plochu\nVýchodzia poloha: zariadenie držte v ruke, potom ho plynulo položte"
+                    "Trvanie: 3 sekundy – zastaví sa automaticky\nGesto: položte zariadenie na rovnú plochu pred seba\nVýchodzia poloha: zariadenie držte pred sebou."
                 "Zdvihnutie k uchu" ->
-                    "Trvanie: ~3 sekundy – zastaví sa automaticky\nGesto: zdvihnite zariadenie k uchu plynulým pohybom\nVýchodzia poloha: zariadenie držte pred sebou"
+                    "Trvanie: 3 sekundy – zastaví sa automaticky\nGesto: zdvihnite zariadenie k uchu plynulým pohybom\nVýchodzia poloha: zariadenie držte pred sebou."
                 else -> ""
             }
             instructionText.text = instructions

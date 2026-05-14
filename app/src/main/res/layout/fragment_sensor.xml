@@ -82,7 +82,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Trvanie: ~60 sekúnd – zastaví sa automaticky\nUmiestnenie: zariadenie vložte do vrecka\nPohyb: choďte normálnym tempom po rovnom povrchu"
+            android:text="Trvanie: 60 sekúnd – zastaví sa automaticky\nUmiestnenie: zariadenie vložte do vrecka\nPohyb: choďte normálnym tempom po rovnom povrchu"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
             android:lineSpacingMultiplier="1.4"
