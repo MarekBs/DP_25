@@ -82,6 +82,6 @@ Prístupový kľúč k Firebase Storage (`serviceAccountKey.json`) je dostupný 
 
 Všetky doteraz zozbierané dáta sú stiahnuté v [DP_25_ml](https://github.com/MarekBs/DP_25_ml) repozitári v priečinku `data/`.
 
-Ak by niekto chcel pridať vlastné logy a pridať sa do modelov, je potrebné po zbere dát stiahnuť dáta z Firebase, pretrénovať modely a s novými modelmi spustiť server (viď `Manual_ML.txt`).
+Ak by niekto chcel pridať vlastné logy a pridať sa do modelov, je potrebné po zbere dát stiahnuť dáta z Firebase, pretrénovať modely a s novými modelmi spustiť server.
 
 
