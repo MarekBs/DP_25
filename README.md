@@ -78,10 +78,8 @@ Na fungovanie overenia je potrebné mať spustený Flask server dostupný v repo
 
 ## Poznámky
 
-Prístupový kľúč k Firebase Storage (`serviceAccountKey.json`) je dostupný iba na vyžiadanie. Je potrebný iba v prípade, že chceme nahrať vlastné logy, manuálne pretrénovať modely a nasadiť na server.
-
 Všetky doteraz zozbierané dáta sú stiahnuté v [DP_25_ml](https://github.com/MarekBs/DP_25_ml) repozitári v priečinku `data/`.
 
-Ak by niekto chcel pridať vlastné logy a pridať sa do modelov, je potrebné po zbere dát stiahnuť dáta z Firebase, pretrénovať modely a s novými modelmi spustiť server.
+Ak by niekto chcel pridať vlastné logy a pridať sa do modelov, je potrebné po zbere dát stiahnuť dáta z Firebase, pretrénovať modely a s novými modelmi spustiť server. Na to treba prístupový kľúč k Firebase Storage (`serviceAccountKey.json`), ktorý je dostupný na vyžiadanie.
 
 
